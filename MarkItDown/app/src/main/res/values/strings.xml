@@ -3,4 +3,25 @@
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+
+    <string name="action_shareAs">Share As...</string>
+
+    <string-array name="shareAs_options">
+        <item>HTML</item>
+        <item>Markdown</item>
+    </string-array>
+
+    <string-array name="drawer_options">
+        <item>Home</item>
+        <item>Notes</item>
+        <item>Notebooks</item>
+        <item>Tags</item>
+        <item>Settings</item>
+    </string-array>
+    
+    <string name="drawer_open">Open Drawer</string>
+    <string name="drawer_close">Close Drawer</string>
+
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
