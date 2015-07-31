@@ -26,6 +26,7 @@ public class EditNoteFragment extends Fragment {
 
     private int noteId;
     private MarkItDownDbHelper dbHelper;
+    private SQLiteDatabase readableDb;
     private EditText noteTitle;
     private EditText noteContent;
 
@@ -37,6 +38,7 @@ public class EditNoteFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         dbHelper = new MarkItDownDbHelper(getActivity());
+        readableDb = dbHelper.getReadableDatabase();
     }
 
     @Override
@@ -81,8 +83,8 @@ public class EditNoteFragment extends Fragment {
         }
 
         if (notesCursor.moveToFirst()) {
-            ((EditText)getView().findViewById(R.id.note_title)).setText(notesCursor.getString(TITLE_POS));
-            ((EditText)getView().findViewById(R.id.note_content)).setText(notesCursor.getString(CONTENT_POS));
+            noteTitle.setText(notesCursor.getString(TITLE_POS));
+            noteContent.setText(notesCursor.getString(CONTENT_POS));
             // TODO: treat TAGS
         }
 
@@ -94,14 +96,14 @@ public class EditNoteFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
-        View fragRootView = getView();
         savedInstanceState.putString(NOTE_TITLE, noteTitle.getText().toString());
         savedInstanceState.putString(NOTE_CONTENT, noteContent.getText().toString());
-        // TODO: save text, title, etc
     }
 
     @Override
     public void onDetach() {
+        super.onDetach();
+        readableDb.close();
         dbHelper.close();
     }
 
@@ -111,12 +113,19 @@ public class EditNoteFragment extends Fragment {
            Whoever starts this fragment is responsible for calling .setArguments() to pass the note
            id to edit.
         */
+
+        if (args == null) {
+            // If the fragment hasn't been passed any values, treat as a new note
+            noteId = -1;
+            return null;
+        }
+
         noteId = args.getInt(NOTE_ID_ARG, -1);
         if (noteId == -1) {
             return null;
         } else {
-            SQLiteDatabase db = dbHelper.getReadableDatabase();
-            return db.query(MarkItDownDbContract.Notes.TABLE_NAME,
+
+            return readableDb.query(MarkItDownDbContract.Notes.TABLE_NAME,
                     new String[]{ MarkItDownDbContract.Notes.COLUMN_NAME_TITLE, MarkItDownDbContract.Notes.COLUMN_NAME_TEXT_MARKDOWN,
                     MarkItDownDbContract.Notes.COLUMN_NAME_TAGS}, "_id = ?", new String[]{ Integer.toString(noteId) },
                     null, null, null, Integer.toString(1));
@@ -142,3 +151,13 @@ public class EditNoteFragment extends Fragment {
         Toast.makeText(getActivity(), R.string.note_saved_msg , Toast.LENGTH_SHORT).show();
     }
 }
+
+/*
+    --EXAMPLE--
+    Starting this fragment to edit note with _id = 1:
+
+                fragment = new EditNoteFragment();
+                Bundle bundle = new Bundle();
+                bundle.putInt(EditNoteFragment.NOTE_ID_ARG, 1);
+                fragment.setArguments(bundle);
+ */
