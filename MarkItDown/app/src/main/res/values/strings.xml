@@ -21,6 +21,8 @@
     
     <string name="drawer_open">Open Drawer</string>
     <string name="drawer_close">Close Drawer</string>
+    <string name="note_saved_msg">Note saved!</string>
+    <string name="note_deleted_msg">Note deleted!</string>
 
 <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
