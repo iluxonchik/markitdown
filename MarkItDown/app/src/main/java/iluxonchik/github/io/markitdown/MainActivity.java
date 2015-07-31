@@ -111,9 +111,8 @@ public class MainActivity extends Activity {
                 }
 
                 if (fragmentManager.getBackStackEntryCount() == 0) {
-                    /* If the back stack is empty, put the TopFragment in the container */
-                    currentPosition = 0;
-                    replaceFragment(R.id.content_frame, new TopFragment(), TOP_FRAGMENT_TAG);
+                    /* If the back stack is empty, end the activity */
+                    finish();
                 }
 
                 updateActionBarTitle(currentPosition);
