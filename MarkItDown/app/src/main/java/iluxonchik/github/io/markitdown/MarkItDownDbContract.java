@@ -60,6 +60,7 @@ public final class MarkItDownDbContract {
         public static final String COLUMN_NAME_NOTEBOOK = "Notebook";
         public static final String COLUMN_NAME_TAGS = "Tags";
         public static final String COLUMN_NAME_EDITED = "Edited";
+        public static final String COLUMN_NAME_DATE_SAVED = "DateSaved";
 
         public static final String CREATE_TABLE = "CREATE TABLE " + TABLE_NAME + " ("
                 + _ID + INTEGER_TYPE + " PRIMARY KEY AUTOINCREMENT" + COMMA_SEP
@@ -68,6 +69,7 @@ public final class MarkItDownDbContract {
                 + COLUMN_NAME_TEXT_HTML + COMMA_SEP
                 + COLUMN_NAME_NOTEBOOK + INTEGER_TYPE +" REFERENCES " + Notebooks.TABLE_NAME + "(_id)" + COMMA_SEP
                 + COLUMN_NAME_TAGS + TEXT_TYPE + COMMA_SEP
+                + COLUMN_NAME_DATE_SAVED + TEXT_TYPE
                 + COLUMN_NAME_EDITED + INTEGER_TYPE
                 + ");";
     }
