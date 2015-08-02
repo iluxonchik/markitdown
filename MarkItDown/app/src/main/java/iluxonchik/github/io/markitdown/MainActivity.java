@@ -5,13 +5,11 @@ import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.content.ContentValues;
+import android.content.Intent;
 import android.content.res.Configuration;
-import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.widget.DrawerLayout;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,7 +30,7 @@ public class MainActivity extends Activity {
     private int currentPosition = 0;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -124,9 +122,9 @@ public class MainActivity extends Activity {
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
+    protected void onSaveInstanceState(Bundle outState) {
         outState.putInt(CURR_POSITION, currentPosition);
+        super.onSaveInstanceState(outState);
     }
 
 
@@ -199,8 +197,11 @@ public class MainActivity extends Activity {
         switch (position) {
             case 0:
                 // Home
-                fragment = new TopFragment();
-                break;
+                Intent in = new Intent(this, EditNoteActivity.class);
+                //in.putExtra(EditNoteActivity.NOTE_ID_ARG, -1);
+                startActivity(in);
+                return;
+
             case 1:
                 // Notes
                 fragment = new NotesFragment();

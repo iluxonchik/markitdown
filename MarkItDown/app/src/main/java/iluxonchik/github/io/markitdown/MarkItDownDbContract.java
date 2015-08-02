@@ -69,7 +69,7 @@ public final class MarkItDownDbContract {
                 + COLUMN_NAME_TEXT_HTML + COMMA_SEP
                 + COLUMN_NAME_NOTEBOOK + INTEGER_TYPE +" REFERENCES " + Notebooks.TABLE_NAME + "(_id)" + COMMA_SEP
                 + COLUMN_NAME_TAGS + TEXT_TYPE + COMMA_SEP
-                + COLUMN_NAME_DATE_SAVED + TEXT_TYPE
+                + COLUMN_NAME_DATE_SAVED + INTEGER_TYPE + COMMA_SEP
                 + COLUMN_NAME_EDITED + INTEGER_TYPE
                 + ");";
     }
