@@ -212,8 +212,12 @@ public class MainActivity extends Activity {
                 break;
             case 3:
                 // Tags
-                fragment = new TagsFragment();
-                break;
+                Intent inte = new Intent(this, ViewNoteActivity.class);
+                //in.putExtra(EditNoteActivity.NOTE_ID_ARG, -1);
+                startActivity(inte);
+                return;
+                //fragment = new TagsFragment();
+                //break;
             case 4:
                 // Settings
                 fragment = new SettingsFragment();

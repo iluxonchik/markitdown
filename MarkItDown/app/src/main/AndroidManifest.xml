@@ -20,6 +20,15 @@
             android:name=".EditNoteActivity"
             android:label="@string/title_activity_edit_note" >
         </activity>
+        <activity
+            android:name=".ViewNoteActivity"
+            android:label="@string/title_activity_view_note" >
+        </activity>
+
+        <service
+            android:name=".MarkdownToHTMLService"
+            android:exported="false" >
+        </service>
     </application>
 
 </manifest>
