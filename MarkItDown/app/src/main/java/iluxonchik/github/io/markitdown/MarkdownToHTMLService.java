@@ -13,7 +13,7 @@ import android.webkit.WebView;
 public class MarkdownToHTMLService extends IntentService {
 
     private static final String ACTION_COMPLETE = "iluxonchik.github.io.markitdown.action.COMPLETE";
-    private static final String EXTRA_NOTE_ID = "iluxonchik.github.io.markitdown.extra.NOTE_ID";
+    public static final String EXTRA_NOTE_ID = "iluxonchik.github.io.markitdown.extra.NOTE_ID";
     private final int NULL_NOTE = -1;
     private final int EDITED_POS = 0;
     private final int FALSE = 0;
@@ -36,9 +36,16 @@ public class MarkdownToHTMLService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         Log.d(MD_TO_HTML_SERVICE_LOGTAG, "Starting service...");
 
-        if (intent == null) return;
+        if (intent == null) {
+            Log.d(MD_TO_HTML_SERVICE_LOGTAG, "Intent null");
+            return;
+        }
         noteId = intent.getIntExtra(EXTRA_NOTE_ID, NULL_NOTE);
-        if (noteId == NULL_NOTE) return;
+
+        if (noteId == NULL_NOTE) {
+            Log.d(MD_TO_HTML_SERVICE_LOGTAG, "Note ID == -1");
+            return;
+        }
 
         dbHelper = new MarkItDownDbHelper(this);
         readableDb = dbHelper.getReadableDatabase();
@@ -57,7 +64,7 @@ public class MarkdownToHTMLService extends IntentService {
             // TODO: broadcast that note is updated
             Log.d(MD_TO_HTML_SERVICE_LOGTAG, "Note has an updated HTML");
             LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(ACTION_COMPLETE));
-
+            return;
         }
 
         // TODO: convert md to html, store html in db, set edited column val to 0, broadcast that
@@ -86,6 +93,8 @@ public class MarkdownToHTMLService extends IntentService {
 
         writableDb.update(MarkItDownDbContract.Notes.TABLE_NAME, contentValues, "_id = ?",
                 new String[]{Integer.toString(noteId)});
+
+        Log.d(MD_TO_HTML_SERVICE_LOGTAG, "Updated db");
 
         writableDb.close();
 
