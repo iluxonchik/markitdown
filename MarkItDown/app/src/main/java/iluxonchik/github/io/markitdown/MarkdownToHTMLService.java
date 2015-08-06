@@ -12,7 +12,7 @@ import android.webkit.WebView;
 
 public class MarkdownToHTMLService extends IntentService {
 
-    private static final String ACTION_COMPLETE = "iluxonchik.github.io.markitdown.action.COMPLETE";
+    public static final String ACTION_COMPLETE = "iluxonchik.github.io.markitdown.action.COMPLETE";
     public static final String EXTRA_NOTE_ID = "iluxonchik.github.io.markitdown.extra.NOTE_ID";
     private final int NULL_NOTE = -1;
     private final int EDITED_POS = 0;
@@ -99,6 +99,7 @@ public class MarkdownToHTMLService extends IntentService {
         writableDb.close();
 
         // Broadcast
+
         LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(ACTION_COMPLETE));
 
     }

@@ -34,6 +34,8 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        deleteDatabase(MarkItDownDbContract.DB_NAME);
+
         drawerOptions = getResources().getStringArray(R.array.drawer_options);
         drawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
         drawerList = (ListView)findViewById(R.id.drawer);
@@ -213,7 +215,7 @@ public class MainActivity extends Activity {
             case 3:
                 // Tags
                 Intent inte = new Intent(this, ViewNoteActivity.class);
-                //in.putExtra(EditNoteActivity.NOTE_ID_ARG, -1);
+                inte.putExtra(ViewNoteActivity.EXTRA_NOTE_ID, 1);
                 startActivity(inte);
                 return;
                 //fragment = new TagsFragment();
