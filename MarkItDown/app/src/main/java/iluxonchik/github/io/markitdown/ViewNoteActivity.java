@@ -1,5 +1,6 @@
 package iluxonchik.github.io.markitdown;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -29,8 +30,9 @@ public class ViewNoteActivity extends Activity {
     private BroadcastReceiver receiver;
     private MarkItDownDbHelper dbHelper;
     private SQLiteDatabase readableDb;
+    private Cursor cursor;
 
-    private final int CURSORT_TITLE_POS = 0;
+    private final int CURSOR_TITLE_POS = 0;
     private final int CURSOR_HTMLTEXT_POS = 1;
     private final String WEBVIEW_MIME = "text/html";
     private final String WEBVIEW_ENCODING = "utf-8";
@@ -59,8 +61,10 @@ public class ViewNoteActivity extends Activity {
 
         startService(intent);
 
-       // WebView webView = (WebView) findViewById(R.id.note_content);
-       // webView.loadData(txtmark.mdToHTML(md), "text/html", "UTF-8");
+        populateTextViewWithTitle((TextView) findViewById(R.id.note_title), getNoteCursor());
+
+        ActionBar actionBar = getActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
     }
 
     @Override
@@ -92,7 +96,10 @@ public class ViewNoteActivity extends Activity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_edit_note) {
+            Intent intent = new Intent(this, EditNoteActivity.class);
+            intent.putExtra(EditNoteActivity.NOTE_ID_ARG, noteId);
+            startActivity(intent);
             return true;
         }
 
@@ -100,10 +107,13 @@ public class ViewNoteActivity extends Activity {
     }
 
     private Cursor getNoteCursor() {
-        return readableDb.query(MarkItDownDbContract.Notes.TABLE_NAME,
-                new String[]{MarkItDownDbContract.Notes.COLUMN_NAME_TITLE,
-                        MarkItDownDbContract.Notes.COLUMN_NAME_TEXT_HTML},
-                "_id = ?", new String[]{Integer.toString(noteId)}, null, null, null, null);
+        if (cursor == null) {
+            cursor = readableDb.query(MarkItDownDbContract.Notes.TABLE_NAME,
+                    new String[]{MarkItDownDbContract.Notes.COLUMN_NAME_TITLE,
+                            MarkItDownDbContract.Notes.COLUMN_NAME_TEXT_HTML},
+                    "_id = ?", new String[]{Integer.toString(noteId)}, null, null, null, null);
+        }
+        return cursor;
     }
 
     private void populateWebViewWithNote(WebView webView, Cursor cursor) {
@@ -114,6 +124,15 @@ public class ViewNoteActivity extends Activity {
         }
 
         webView.loadData(cursor.getString(CURSOR_HTMLTEXT_POS), WEBVIEW_MIME, WEBVIEW_ENCODING);
+    }
+
+    private void populateTextViewWithTitle(TextView textView, Cursor cursor) {
+
+        if (!cursor.moveToFirst()) {
+            Log.d(VIEW_NOTE_ACTIVITY_LOGTAG, "populateTextViewWithTitle(): Cursor is empty.");
+            return;
+        }
+        textView.setText(cursor.getString(CURSOR_TITLE_POS));
     }
 
 }

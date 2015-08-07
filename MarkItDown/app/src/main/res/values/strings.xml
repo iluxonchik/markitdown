@@ -29,6 +29,8 @@
     <string name="dialog_yes">Yes</string>
     <string name="dialog_no">No</string>
 
+    <string name="edit_note_menu_opt">Edit Note</string>
+
 <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_edit_note">EditNoteActivity</string>
