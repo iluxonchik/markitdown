@@ -41,8 +41,6 @@ public class NotesFragment extends ListFragment {
                 null, null, null, null, null);
 
         TaggableCursorAdapter cursorAdapter = new TaggableCursorAdapter(inflater.getContext(), cursor, 0);
-
-        //notesList.setAdapter(adapter);
         setListAdapter(cursorAdapter);
         return super.onCreateView(inflater, container, savedInstanceState);
     }
@@ -55,9 +53,8 @@ public class NotesFragment extends ListFragment {
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         Integer note_id = (Integer)v.getTag();
-        // TODO: send to ViewNote activity, for now just takes to edit note
-        Intent intent = new Intent(getActivity(), EditNoteActivity.class);
-        intent.putExtra(EditNoteActivity.NOTE_ID_ARG, note_id);
+        Intent intent = new Intent(getActivity(), ViewNoteActivity.class);
+        intent.putExtra(ViewNoteActivity.EXTRA_NOTE_ID, note_id);
         startActivity(intent);
 
         super.onListItemClick(l, v, position, id);

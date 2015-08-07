@@ -34,7 +34,8 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        deleteDatabase(MarkItDownDbContract.DB_NAME);
+        // TODO: remove line later, only for testing purposes.
+        //deleteDatabase(MarkItDownDbContract.DB_NAME);
 
         drawerOptions = getResources().getStringArray(R.array.drawer_options);
         drawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
