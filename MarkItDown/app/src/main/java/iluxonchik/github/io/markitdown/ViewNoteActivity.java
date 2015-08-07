@@ -8,17 +8,14 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.AsyncTask;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.webkit.WebView;
 import android.widget.TextView;
-
-import org.w3c.dom.Text;
 
 public class ViewNoteActivity extends Activity {
 
@@ -37,15 +34,42 @@ public class ViewNoteActivity extends Activity {
     private final String WEBVIEW_MIME = "text/html";
     private final String WEBVIEW_ENCODING = "utf-8";
 
+    private boolean cameFromPausedState = false;
+
+    private class EditCheckTask extends AsyncTask<Integer, Void, Boolean> {
+        private final int CURSOR_EDITED_POS = 0;
+        private final int TRUE = 1;
+
+        @Override
+        protected Boolean doInBackground(Integer... params) {
+            Cursor cursor = readableDb.query(MarkItDownDbContract.Notes.TABLE_NAME,
+                    new String[]{MarkItDownDbContract.Notes.COLUMN_NAME_EDITED}, "_id = ?",
+                    new String[]{Integer.toString(params[0])}, null, null, null, null);
+
+            if (!cursor.moveToFirst()) {
+                Log.d(VIEW_NOTE_ACTIVITY_LOGTAG, "EiditCheckTask: cursor empty");
+                return false;
+            }
+
+            return (cursor.getInt(CURSOR_EDITED_POS) == TRUE);
+        }
+
+        @Override
+        protected void onPostExecute(Boolean noteEdited) {
+            if (noteEdited) {
+                Log.d(VIEW_NOTE_ACTIVITY_LOGTAG, "EiditCheckTask: note contents updated");
+                updateNoteCursor();
+                showNote();
+            }
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_note);
 
         noteId = getIntent().getIntExtra(EXTRA_NOTE_ID, NULL_NOTE);
-
-        Intent intent = new Intent(this, MarkdownToHTMLService.class);
-        intent.putExtra(MarkdownToHTMLService.EXTRA_NOTE_ID, noteId);
 
         dbHelper = new MarkItDownDbHelper(this);
         readableDb = dbHelper.getReadableDatabase();
@@ -55,14 +79,11 @@ public class ViewNoteActivity extends Activity {
             public void onReceive(Context context, Intent intent) {
                 // HTML note ready, query db and display results
                 Log.d(VIEW_NOTE_ACTIVITY_LOGTAG, "Received broadcast");
-                ViewNoteActivity.this.populateWebViewWithNote((WebView) findViewById(R.id.note_content), getNoteCursor());
+                ViewNoteActivity.this.populateWebViewWithNote((WebView) findViewById(R.id.note_content), getCursor());
             }
         };
 
-        startService(intent);
-
-        populateTextViewWithTitle((TextView) findViewById(R.id.note_title), getNoteCursor());
-
+        showNote();
         ActionBar actionBar = getActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
     }
@@ -72,11 +93,15 @@ public class ViewNoteActivity extends Activity {
         super.onResume();
         IntentFilter filter = new IntentFilter(MarkdownToHTMLService.ACTION_COMPLETE);
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter);
+
+        if (cameFromPausedState)
+            new EditCheckTask().execute(noteId);
     }
 
     @Override
     public void onPause() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
+        cameFromPausedState = true;
         super.onPause();
     }
 
@@ -106,14 +131,33 @@ public class ViewNoteActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    private Cursor getNoteCursor() {
+    private Cursor getCursor() {
         if (cursor == null) {
-            cursor = readableDb.query(MarkItDownDbContract.Notes.TABLE_NAME,
-                    new String[]{MarkItDownDbContract.Notes.COLUMN_NAME_TITLE,
-                            MarkItDownDbContract.Notes.COLUMN_NAME_TEXT_HTML},
-                    "_id = ?", new String[]{Integer.toString(noteId)}, null, null, null, null);
+            updateNoteCursor();
         }
         return cursor;
+    }
+
+    private Cursor getNewNoteCursor() {
+        return readableDb.query(MarkItDownDbContract.Notes.TABLE_NAME,
+                new String[]{MarkItDownDbContract.Notes.COLUMN_NAME_TITLE,
+                        MarkItDownDbContract.Notes.COLUMN_NAME_TEXT_HTML},
+                "_id = ?", new String[]{Integer.toString(noteId)}, null, null, null, null);
+    }
+
+    private void updateNoteCursor() {
+        cursor = getNewNoteCursor();
+    }
+
+    private void showNote() {
+        startMarkdownToHTMLService();
+        populateTextViewWithTitle((TextView) findViewById(R.id.note_title), getCursor());
+    }
+
+    private void startMarkdownToHTMLService() {
+        Intent intent = new Intent(this, MarkdownToHTMLService.class);
+        intent.putExtra(MarkdownToHTMLService.EXTRA_NOTE_ID, noteId);
+        startService(intent);
     }
 
     private void populateWebViewWithNote(WebView webView, Cursor cursor) {
