@@ -31,8 +31,11 @@ import java.util.Calendar;
 public class EditNoteActivity extends Activity implements SaveNoteDialogFragment.SaveNoteDialogListener {
 
     public static final String NOTE_ID_ARG = "noteId";
-    private static final String NOTE_TITLE = "noteTitle";
-    private static final String NOTE_CONTENT = "noteContent";
+    private final String NOTE_TITLE = "noteTitle";
+    private final String NOTE_CONTENT = "noteContent";
+    private final String TEXT_CHANGED = "textChanged";
+
+    private final String EDIT_NOTE_ACTIVITY_LOGTAG = "EditNoteActivity";
 
     private int noteId;
     private MarkItDownDbHelper dbHelper;
@@ -57,38 +60,55 @@ public class EditNoteActivity extends Activity implements SaveNoteDialogFragment
         ActionBar actionBar = getActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
 
-
-        TextWatcher textWatcher = new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                textChanged = true;
-                Log.v("TAG", Boolean.toString(textChanged));
-            }
-        };
-
         noteTitle = (EditText)findViewById(R.id.note_title);
         noteContent = (EditText)findViewById(R.id.note_content);
-
-        noteTitle.addTextChangedListener(textWatcher);
-        noteContent.addTextChangedListener(textWatcher);
 
         if (savedInstanceState == null) {
             // No savedInstanceState, run db query and populate from the resulting cursor
             populateContents(getNotesCursor(getIntent().getExtras()), true);
         } else {
+            textChanged = savedInstanceState.getBoolean(TEXT_CHANGED);
             populateContents(savedInstanceState);
         }
 
+        addTextChangedListener();
+
+    }
+
+    private void addTextChangedListener() {
+        // TODO: this code ain't good :\
+        /*
+        * Adds TextChanged listener to note title and content, only if necessary (i.e. if
+        * textChanged = false, since their sole purpose is to set that var to true if some part
+        * of the title or content gets changed.
+        *
+        */
+
+        if (!textChanged) {
+            TextWatcher textWatcher = new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                    Log.d(EDIT_NOTE_ACTIVITY_LOGTAG, "Key pressed, removing listener.");
+                    textChanged = true;
+                    Log.d(EDIT_NOTE_ACTIVITY_LOGTAG, "afterTextChanged(): textChanged = " + Boolean.toString(textChanged));
+                    noteTitle.removeTextChangedListener(this);
+                    noteContent.removeTextChangedListener(this);
+                }
+            };
+
+            noteTitle.addTextChangedListener(textWatcher);
+            noteContent.addTextChangedListener(textWatcher);
+        }
     }
 
     private void populateContents(Bundle savedInstanceState) {
@@ -125,6 +145,7 @@ public class EditNoteActivity extends Activity implements SaveNoteDialogFragment
 
     @Override
     public void onBackPressed() {
+        Log.d(EDIT_NOTE_ACTIVITY_LOGTAG, "onBackPressed(): textChanged = " + Boolean.toString(textChanged));
         if (textChanged) {
             showSaveNoteDialog();
         } else {
@@ -152,6 +173,7 @@ public class EditNoteActivity extends Activity implements SaveNoteDialogFragment
         super.onSaveInstanceState(savedInstanceState);
         savedInstanceState.putString(NOTE_TITLE, noteTitle.getText().toString());
         savedInstanceState.putString(NOTE_CONTENT, noteContent.getText().toString());
+        savedInstanceState.putBoolean(TEXT_CHANGED, textChanged);
     }
 
     @Override

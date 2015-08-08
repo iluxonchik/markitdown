@@ -23,7 +23,7 @@
     <string name="drawer_close">Close Drawer</string>
     <string name="note_saved_msg">Note saved!</string>
     <string name="note_deleted_msg">Note deleted!</string>
-    <string name="dialog_save_note_question">All unsaved changes will be lost. Save note?</string>
+    <string name="dialog_save_note_question">All unsaved changes will be lost.</string>
     <string name="dialog_save_note_changes_question">All unsaved changes will be lost.</string>
     <string name="dialog_save_note_title">Save note?</string>
     <string name="dialog_yes">Yes</string>

@@ -28,11 +28,17 @@ public class ViewNoteActivity extends Activity {
     private MarkItDownDbHelper dbHelper;
     private SQLiteDatabase readableDb;
     private Cursor cursor;
+    private String noteTitle;
+    private String noteContent;
 
     private final int CURSOR_TITLE_POS = 0;
     private final int CURSOR_HTMLTEXT_POS = 1;
     private final String WEBVIEW_MIME = "text/html";
     private final String WEBVIEW_ENCODING = "utf-8";
+
+    private final String NOTE_TITLE = "noteTile";
+    private final String NOTE_CONTENT = "noteContent";
+    private final String CAME_FROM_PAUSED_STATE = "cameFromPausedState";
 
     private boolean cameFromPausedState = false;
 
@@ -83,7 +89,11 @@ public class ViewNoteActivity extends Activity {
             }
         };
 
-        showNote();
+        if (savedInstanceState != null) {
+            restoreNoteFromSavedInstanceState(savedInstanceState);
+        } else {
+             showNote();
+        }
         ActionBar actionBar = getActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
     }
@@ -92,6 +102,7 @@ public class ViewNoteActivity extends Activity {
     public void onResume() {
         super.onResume();
         IntentFilter filter = new IntentFilter(MarkdownToHTMLService.ACTION_COMPLETE);
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter);
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter);
 
         if (cameFromPausedState)
@@ -103,6 +114,13 @@ public class ViewNoteActivity extends Activity {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
         cameFromPausedState = true;
         super.onPause();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putString(NOTE_TITLE, noteTitle);
+        outState.putString(NOTE_CONTENT, noteContent);
+        outState.putBoolean(CAME_FROM_PAUSED_STATE, cameFromPausedState);
     }
 
     @Override
@@ -121,11 +139,17 @@ public class ViewNoteActivity extends Activity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_edit_note) {
-            Intent intent = new Intent(this, EditNoteActivity.class);
-            intent.putExtra(EditNoteActivity.NOTE_ID_ARG, noteId);
-            startActivity(intent);
-            return true;
+        switch (id) {
+
+            case R.id.action_edit_note:
+                Intent intent = new Intent(this, EditNoteActivity.class);
+                intent.putExtra(EditNoteActivity.NOTE_ID_ARG, noteId);
+                startActivity(intent);
+                return true;
+
+            case R.id.home:
+                onBackPressed();
+                break;
         }
 
         return super.onOptionsItemSelected(item);
@@ -149,6 +173,17 @@ public class ViewNoteActivity extends Activity {
         cursor = getNewNoteCursor();
     }
 
+    private void restoreNoteFromSavedInstanceState(Bundle savedInstanceState) {
+
+        Log.d(VIEW_NOTE_ACTIVITY_LOGTAG, "Restoring note from savedInstanceState");
+
+        noteContent = savedInstanceState.getString(NOTE_CONTENT);
+        noteTitle = savedInstanceState.getString(NOTE_TITLE);
+        cameFromPausedState = savedInstanceState.getBoolean(CAME_FROM_PAUSED_STATE);
+        ((TextView)findViewById(R.id.note_title)).setText(noteTitle);
+        ((WebView)findViewById(R.id.note_content)).loadData(noteContent, WEBVIEW_MIME, WEBVIEW_ENCODING);
+    }
+
     private void showNote() {
         startMarkdownToHTMLService();
         populateTextViewWithTitle((TextView) findViewById(R.id.note_title), getCursor());
@@ -167,7 +202,8 @@ public class ViewNoteActivity extends Activity {
             return;
         }
 
-        webView.loadData(cursor.getString(CURSOR_HTMLTEXT_POS), WEBVIEW_MIME, WEBVIEW_ENCODING);
+        noteContent = cursor.getString(CURSOR_HTMLTEXT_POS);
+        webView.loadData(noteContent, WEBVIEW_MIME, WEBVIEW_ENCODING);
     }
 
     private void populateTextViewWithTitle(TextView textView, Cursor cursor) {
@@ -176,7 +212,8 @@ public class ViewNoteActivity extends Activity {
             Log.d(VIEW_NOTE_ACTIVITY_LOGTAG, "populateTextViewWithTitle(): Cursor is empty.");
             return;
         }
-        textView.setText(cursor.getString(CURSOR_TITLE_POS));
+        noteTitle = cursor.getString(CURSOR_TITLE_POS);
+        textView.setText(noteTitle);
     }
 
 }
