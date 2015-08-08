@@ -29,7 +29,12 @@
     <string name="dialog_yes">Yes</string>
     <string name="dialog_no">No</string>
 
+    <string name="share_note_action_text">Share this note via</string>
+
     <string name="edit_note_menu_opt">Edit Note</string>
+    <string name="share_note_menu_opt">Share</string>
+
+    <string name="view_note_activity_title">Note Viewer</string>
 
 <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

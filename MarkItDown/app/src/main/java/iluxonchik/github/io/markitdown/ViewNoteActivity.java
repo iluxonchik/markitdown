@@ -35,6 +35,7 @@ public class ViewNoteActivity extends Activity {
     private final int CURSOR_HTMLTEXT_POS = 1;
     private final String WEBVIEW_MIME = "text/html";
     private final String WEBVIEW_ENCODING = "utf-8";
+    private final String INTENT_TYPE_TEXT_PLAIN = "text/plain";
 
     private final String NOTE_TITLE = "noteTile";
     private final String NOTE_CONTENT = "noteContent";
@@ -96,6 +97,7 @@ public class ViewNoteActivity extends Activity {
         }
         ActionBar actionBar = getActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setTitle(getString(R.string.view_note_activity_title));
     }
 
     @Override
@@ -138,12 +140,20 @@ public class ViewNoteActivity extends Activity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
+        Intent intent = null;
         switch (id) {
-
             case R.id.action_edit_note:
-                Intent intent = new Intent(this, EditNoteActivity.class);
+                intent = new Intent(this, EditNoteActivity.class);
                 intent.putExtra(EditNoteActivity.NOTE_ID_ARG, noteId);
+                startActivity(intent);
+                return true;
+
+            case R.id.action_share_note:
+                intent = new Intent(Intent.ACTION_SEND);
+                intent.putExtra(Intent.EXTRA_TEXT, noteContent);
+                intent.putExtra(Intent.EXTRA_TITLE, noteTitle);
+                intent.setType(INTENT_TYPE_TEXT_PLAIN);
+                intent = Intent.createChooser(intent, getString(R.string.share_note_action_text));
                 startActivity(intent);
                 return true;
 
