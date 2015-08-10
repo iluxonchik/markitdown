@@ -6,6 +6,9 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,12 +17,27 @@ import android.app.DialogFragment;
 
 import java.util.BitSet;
 
-public class ShareAsDialogFragment extends DialogFragment {
+public class ShareAsDialogFragment extends DialogFragment{
 
+    private OnShareAsOptionSelectedListener listener;
+
+    public interface OnShareAsOptionSelectedListener {
+        public void onHTMLClicked(DialogFragment dialog);
+        public void onMarkdownClicked(DialogFragment dialog);
+    }
+
+    public void registerOnOptionSelectedListener(OnShareAsOptionSelectedListener listener) {
+        this.listener = listener;
+    }
+
+    public void removeOnOptionSelectedListener() {
+        listener = null;
+    }
 
     public ShareAsDialogFragment() {
         // Required empty public constructor
     }
+
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -31,17 +49,16 @@ public class ShareAsDialogFragment extends DialogFragment {
                 switch (which) {
                     case 0:
                         // HTML
-                        // TODO: start share action with HTML
+                        listener.onHTMLClicked(ShareAsDialogFragment.this);
                         break;
                     case 1:
                         // Markdown
-                        // TODO: start share action with Markdown
+                        listener.onMarkdownClicked(ShareAsDialogFragment.this);
                         break;
                 }
             }
         });
         return alertDialogBuilder.create();
     }
-
 
 }

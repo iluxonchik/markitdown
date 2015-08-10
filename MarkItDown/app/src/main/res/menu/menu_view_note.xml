@@ -11,5 +11,7 @@
     <item android:id="@+id/action_share_note"
         android:title="@string/share_note_menu_opt"
         android:orderInCategory="2"
-        android:showAsAction="never" />
+        android:icon="@drawable/abc_ic_menu_share_mtrl_alpha"
+        android:showAsAction="ifRoom"
+        />
 </menu>

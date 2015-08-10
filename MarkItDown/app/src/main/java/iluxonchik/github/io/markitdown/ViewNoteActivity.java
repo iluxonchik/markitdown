@@ -2,6 +2,7 @@ package iluxonchik.github.io.markitdown;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.DialogFragment;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -17,9 +18,10 @@ import android.view.MenuItem;
 import android.webkit.WebView;
 import android.widget.TextView;
 
-public class ViewNoteActivity extends Activity {
+public class ViewNoteActivity extends Activity implements ShareAsDialogFragment.OnShareAsOptionSelectedListener {
 
     private final String VIEW_NOTE_ACTIVITY_LOGTAG = "ViewNoteActivity";
+    private final String SHARE_DIALOG_TAG = "ShareDialog";
 
     public static  final String EXTRA_NOTE_ID = "NoteId";
     private final int NULL_NOTE = -1;
@@ -33,6 +35,7 @@ public class ViewNoteActivity extends Activity {
 
     private final int CURSOR_TITLE_POS = 0;
     private final int CURSOR_HTMLTEXT_POS = 1;
+    private final int CURSOR_MDTEXT_POS = 0;
     private final String WEBVIEW_MIME = "text/html";
     private final String WEBVIEW_ENCODING = "utf-8";
     private final String INTENT_TYPE_TEXT_PLAIN = "text/plain";
@@ -42,6 +45,7 @@ public class ViewNoteActivity extends Activity {
     private final String CAME_FROM_PAUSED_STATE = "cameFromPausedState";
 
     private boolean cameFromPausedState = false;
+
 
     private class EditCheckTask extends AsyncTask<Integer, Void, Boolean> {
         private final int CURSOR_EDITED_POS = 0;
@@ -109,6 +113,19 @@ public class ViewNoteActivity extends Activity {
 
         if (cameFromPausedState)
             new EditCheckTask().execute(noteId);
+
+        ShareAsDialogFragment shareAsDialogFragment = (ShareAsDialogFragment) getFragmentManager().findFragmentByTag(SHARE_DIALOG_TAG);
+
+        if (shareAsDialogFragment != null) {
+            /*
+             * When shown, the dialog fragment is tagged. If a fragment with SHARE_DIALOG_TAG is found
+              * then the re-register the listener, since the activity probably has been re-created.
+              * (It's possible to check whether it was really recreated or came from, for example,
+              * onRestart(), but since the operation is a simple pointer assignment, it's not expensive
+              * in terms of performance.
+             */
+            shareAsDialogFragment.registerOnOptionSelectedListener(this);
+        }
     }
 
     @Override
@@ -120,6 +137,7 @@ public class ViewNoteActivity extends Activity {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
         outState.putString(NOTE_TITLE, noteTitle);
         outState.putString(NOTE_CONTENT, noteContent);
         outState.putBoolean(CAME_FROM_PAUSED_STATE, cameFromPausedState);
@@ -140,29 +158,67 @@ public class ViewNoteActivity extends Activity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        Intent intent = null;
         switch (id) {
             case R.id.action_edit_note:
-                intent = new Intent(this, EditNoteActivity.class);
-                intent.putExtra(EditNoteActivity.NOTE_ID_ARG, noteId);
-                startActivity(intent);
+                editNote();
                 return true;
 
             case R.id.action_share_note:
-                intent = new Intent(Intent.ACTION_SEND);
-                intent.putExtra(Intent.EXTRA_TEXT, noteContent);
-                intent.putExtra(Intent.EXTRA_TITLE, noteTitle);
-                intent.setType(INTENT_TYPE_TEXT_PLAIN);
-                intent = Intent.createChooser(intent, getString(R.string.share_note_action_text));
-                startActivity(intent);
+                shareNote();
                 return true;
 
-            case R.id.home:
+            case android.R.id.home:
                 onBackPressed();
                 break;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void editNote() {
+        Intent intent = new Intent(this, EditNoteActivity.class);
+        intent.putExtra(EditNoteActivity.NOTE_ID_ARG, noteId);
+        startActivity(intent);
+    }
+
+    private void shareNote() {
+        showShareAsDialog();
+    }
+
+    private void showShareAsDialog() {
+        ShareAsDialogFragment shareAsDialogFragment = new ShareAsDialogFragment();
+        shareAsDialogFragment.registerOnOptionSelectedListener(this);
+        shareAsDialogFragment.show(getFragmentManager(), SHARE_DIALOG_TAG);
+    }
+
+
+    @Override
+    public void onHTMLClicked(DialogFragment dialog) {
+        //Log.d(VIEW_NOTE_ACTIVITY_LOGTAG, "onHTML called");
+        startShareIntent(noteContent);
+    }
+
+    @Override
+    public void onMarkdownClicked(DialogFragment dialog) {
+        // Get Markdown from db and start an intent with it
+        Cursor c = readableDb.query(MarkItDownDbContract.Notes.TABLE_NAME, new String[]{MarkItDownDbContract.Notes.COLUMN_NAME_TEXT_MARKDOWN},
+                "_id = ?", new String [] { Integer.toString(noteId)},null, null, null, null);
+        if (cursor.moveToFirst()) {
+            startShareIntent(cursor.getString(CURSOR_MDTEXT_POS));
+
+        } else {
+            // TODO: raise an exception (?)
+            Log.d(VIEW_NOTE_ACTIVITY_LOGTAG, "onMarkdownClicked(): cursor empty!");
+        }
+    }
+
+    private void startShareIntent(String shareTextContent) {
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.putExtra(Intent.EXTRA_TEXT, shareTextContent);
+        intent.putExtra(Intent.EXTRA_TITLE, noteTitle);
+        intent.setType(INTENT_TYPE_TEXT_PLAIN);
+        intent = Intent.createChooser(intent, getString(R.string.share_note_action_text));
+        startActivity(intent);
     }
 
     private Cursor getCursor() {
