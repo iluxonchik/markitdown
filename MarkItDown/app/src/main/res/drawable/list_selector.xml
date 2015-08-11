@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Custom selector -->
+
+    <item android:state_activated="true" android:drawable="@drawable/list_selector_activated" />
+    <item android:drawable="@android:color/transparent" />
+
+</selector>

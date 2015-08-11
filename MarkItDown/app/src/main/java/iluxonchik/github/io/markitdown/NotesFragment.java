@@ -8,9 +8,16 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.util.Log;
+import android.view.ActionMode;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
@@ -48,6 +55,71 @@ public class NotesFragment extends ListFragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        final ListView listView = getListView();
+    listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+        //listView.setSelector(R.drawable.list_selector);
+        listView.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
+
+            private final int VIEW_MENU_POS = 0;
+            private final int EDIT_MENU_POS = 1;
+            private final int SHARE_MENU_POS = 2;
+
+            private boolean multipleItemsChecked = false;
+
+            @Override
+            public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
+                Log.d("CAT", "onCheckedStateChanged");
+                // TODO: REFRACTOR nested if's
+                if (multipleItemsChecked) {
+                    if (listView.getCheckedItemCount() == 1) {
+                        Log.d("CAT", "Checked one item");
+                        // Passing from multiple checked items to one
+                        multipleItemsChecked = false;
+                        invertMenuOptions(mode.getMenu());
+                    }
+                } else {
+                    if (listView.getCheckedItemCount() > 1) {
+                        Log.d("CAT", "Checked more than one item");
+                        multipleItemsChecked = true;
+                        invertMenuOptions(mode.getMenu());
+                    }
+                }
+            }
+
+            @Override
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                // Inflate menu
+                Log.d("CAT", "onCreateActionMode");
+                MenuInflater menuInflater = mode.getMenuInflater();
+                menuInflater.inflate(R.menu.menu_notes_context, menu);
+                return true;
+            }
+
+            private void invertMenuOptions(Menu menu) {
+                /*
+                    Inverts the View, Edit and Share options availability in menu.
+                */
+                menu.getItem(VIEW_MENU_POS).setEnabled(!menu.getItem(VIEW_MENU_POS).isEnabled());
+                menu.getItem(EDIT_MENU_POS).setEnabled(!menu.getItem(EDIT_MENU_POS).isEnabled());
+                menu.getItem(SHARE_MENU_POS).setEnabled(!menu.getItem(SHARE_MENU_POS).isEnabled());
+
+            }
+
+            @Override
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                return false;
+            }
+
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {
+
+            }
+        });
     }
 
     @Override

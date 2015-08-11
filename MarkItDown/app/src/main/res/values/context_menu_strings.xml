@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="context_menu_view">View</string>
+    <string name="context_menu_edit">Edit</string>
+    <string name="context_menu_share">Share</string>
+    <string name="context_menu_delete">Delete</string>
+
+</resources>
