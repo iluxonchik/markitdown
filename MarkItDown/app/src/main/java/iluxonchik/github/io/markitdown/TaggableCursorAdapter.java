@@ -44,6 +44,7 @@ public class TaggableCursorAdapter extends CursorAdapter {
         calendar.setTimeInMillis(cursor.getLong(DATE_POS));
         textView.setText(formatter.format(calendar.getTime()));
 
+        // TODO: is this tag even necessary?
         view.setTag(new Integer(cursor.getInt(ID_POS)));
     }
 }

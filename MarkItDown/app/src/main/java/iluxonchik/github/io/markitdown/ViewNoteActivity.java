@@ -38,7 +38,6 @@ public class ViewNoteActivity extends Activity implements ShareAsDialogFragment.
     private final int CURSOR_MDTEXT_POS = 0;
     private final String WEBVIEW_MIME = "text/html";
     private final String WEBVIEW_ENCODING = "utf-8";
-    private final String INTENT_TYPE_TEXT_PLAIN = "text/plain";
 
     private final String NOTE_TITLE = "noteTile";
     private final String NOTE_CONTENT = "noteContent";
@@ -195,7 +194,7 @@ public class ViewNoteActivity extends Activity implements ShareAsDialogFragment.
     @Override
     public void onHTMLClicked(DialogFragment dialog) {
         //Log.d(VIEW_NOTE_ACTIVITY_LOGTAG, "onHTML called");
-        startShareIntent(noteContent);
+        ShareAsDialogFragment.startShareIntent(this,noteContent, noteTitle);
     }
 
     @Override
@@ -204,21 +203,12 @@ public class ViewNoteActivity extends Activity implements ShareAsDialogFragment.
         Cursor c = readableDb.query(MarkItDownDbContract.Notes.TABLE_NAME, new String[]{MarkItDownDbContract.Notes.COLUMN_NAME_TEXT_MARKDOWN},
                 "_id = ?", new String [] { Integer.toString(noteId)},null, null, null, null);
         if (cursor.moveToFirst()) {
-            startShareIntent(cursor.getString(CURSOR_MDTEXT_POS));
+            ShareAsDialogFragment.startShareIntent(this, cursor.getString(CURSOR_MDTEXT_POS), noteTitle);
 
         } else {
             // TODO: raise an exception (?)
             Log.d(VIEW_NOTE_ACTIVITY_LOGTAG, "onMarkdownClicked(): cursor empty!");
         }
-    }
-
-    private void startShareIntent(String shareTextContent) {
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.putExtra(Intent.EXTRA_TEXT, shareTextContent);
-        intent.putExtra(Intent.EXTRA_TITLE, noteTitle);
-        intent.setType(INTENT_TYPE_TEXT_PLAIN);
-        intent = Intent.createChooser(intent, getString(R.string.share_note_action_text));
-        startActivity(intent);
     }
 
     private Cursor getCursor() {

@@ -3,7 +3,9 @@ package iluxonchik.github.io.markitdown;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.os.Parcel;
@@ -20,6 +22,7 @@ import java.util.BitSet;
 public class ShareAsDialogFragment extends DialogFragment{
 
     private OnShareAsOptionSelectedListener listener;
+    private static final String INTENT_TYPE_TEXT_PLAIN = "text/plain";
 
     public interface OnShareAsOptionSelectedListener {
         public void onHTMLClicked(DialogFragment dialog);
@@ -59,6 +62,15 @@ public class ShareAsDialogFragment extends DialogFragment{
             }
         });
         return alertDialogBuilder.create();
+    }
+
+    public static void startShareIntent(Context context, String shareTextContent, String shareTextTitle) {
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.putExtra(Intent.EXTRA_TEXT, shareTextContent);
+        intent.putExtra(Intent.EXTRA_TITLE, shareTextTitle);
+        intent.setType(INTENT_TYPE_TEXT_PLAIN);
+        intent = Intent.createChooser(intent, context.getString(R.string.share_note_action_text));
+        context.startActivity(intent);
     }
 
 }

@@ -1,6 +1,7 @@
 package iluxonchik.github.io.markitdown;
 
 import android.app.Activity;
+import android.app.DialogFragment;
 import android.app.ListFragment;
 import android.content.Intent;
 import android.database.Cursor;
@@ -24,7 +25,7 @@ import android.widget.Toast;
 
 import java.util.zip.Inflater;
 
-public class NotesFragment extends ListFragment {
+public class NotesFragment extends ListFragment implements ShareAsDialogFragment.OnShareAsOptionSelectedListener{
 
     private MarkItDownDbHelper dbHelper;
     private SQLiteDatabase readableDb;
@@ -120,6 +121,7 @@ public class NotesFragment extends ListFragment {
                         startActivity(intent);
                         break;
                     case (R.id.share_note):
+                        new ShareAsDialogFragment().show(getFragmentManager(), null);
                         break;
                     case(R.id.edit_note):
                         break;
@@ -144,7 +146,8 @@ public class NotesFragment extends ListFragment {
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        Integer note_id = (Integer)v.getTag();
+        //Integer note_id = (Integer)v.getTag();
+        Integer note_id = (int)id;
         Intent intent = new Intent(getActivity(), ViewNoteActivity.class);
         intent.putExtra(ViewNoteActivity.EXTRA_NOTE_ID, note_id);
         startActivity(intent);
@@ -152,4 +155,13 @@ public class NotesFragment extends ListFragment {
         super.onListItemClick(l, v, position, id);
     }
 
+    @Override
+    public void onHTMLClicked(DialogFragment dialog) {
+        // Share note as HTML
+    }
+
+    @Override
+    public void onMarkdownClicked(DialogFragment dialog) {
+        // Share note as Markdown
+    }
 }
