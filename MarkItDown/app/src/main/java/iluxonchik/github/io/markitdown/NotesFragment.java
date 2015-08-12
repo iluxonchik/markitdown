@@ -112,12 +112,32 @@ public class NotesFragment extends ListFragment {
 
             @Override
             public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                Intent intent;
+                switch (item.getItemId()) {
+                    case (R.id.view_note):
+                        intent = new Intent(getActivity(), ViewNoteActivity.class);
+                        intent.putExtra(ViewNoteActivity.EXTRA_NOTE_ID, getSelectedItemId());
+                        startActivity(intent);
+                        break;
+                    case (R.id.share_note):
+                        break;
+                    case(R.id.edit_note):
+                        break;
+                    case(R.id.delete_note):
+                        break;
+                }
+
                 return false;
             }
 
             @Override
             public void onDestroyActionMode(ActionMode mode) {
 
+            }
+
+            private int getSelectedItemId() {
+                long[] checkedItemIds = listView.getCheckedItemIds();
+                return (int)checkedItemIds[0];
             }
         });
     }
