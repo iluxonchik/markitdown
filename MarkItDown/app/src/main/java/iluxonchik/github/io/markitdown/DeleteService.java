@@ -79,6 +79,7 @@ public class DeleteService extends IntentService {
             Log.d(DELETE_NOTE_SERVICE_LOGTAG, "noteId = -1");
             return;
         }
+        dbHelper = new MarkItDownDbHelper(this);
         writableDb = dbHelper.getWritableDatabase();
         // Remove note references from "Notes" table
         deleteFromNotesTable(noteId);
