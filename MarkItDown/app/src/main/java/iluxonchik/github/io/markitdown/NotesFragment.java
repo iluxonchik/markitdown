@@ -134,6 +134,7 @@ public class NotesFragment extends ListFragment implements ShareAsDialogFragment
                         startActivity(intent);
                         break;
                     case (R.id.delete_note):
+
                         break;
                 }
                 return false;

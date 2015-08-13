@@ -29,6 +29,10 @@
             android:name=".MarkdownToHTMLService"
             android:exported="false" >
         </service>
+        <service
+            android:name=".DeleteService"
+            android:exported="false" >
+        </service>
     </application>
 
 </manifest>
