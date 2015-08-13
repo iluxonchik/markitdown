@@ -194,13 +194,13 @@ public class ViewNoteActivity extends Activity implements ShareAsDialogFragment.
     @Override
     public void onHTMLClicked(DialogFragment dialog) {
         //Log.d(VIEW_NOTE_ACTIVITY_LOGTAG, "onHTML called");
-        ShareAsDialogFragment.startShareIntent(this,noteContent, noteTitle);
+        ShareAsDialogFragment.startShareIntent(this, noteContent, noteTitle);
     }
 
     @Override
     public void onMarkdownClicked(DialogFragment dialog) {
         // Get Markdown from db and start an intent with it
-        Cursor c = readableDb.query(MarkItDownDbContract.Notes.TABLE_NAME, new String[]{MarkItDownDbContract.Notes.COLUMN_NAME_TEXT_MARKDOWN},
+        Cursor cursor = readableDb.query(MarkItDownDbContract.Notes.TABLE_NAME, new String[]{MarkItDownDbContract.Notes.COLUMN_NAME_TEXT_MARKDOWN},
                 "_id = ?", new String [] { Integer.toString(noteId)},null, null, null, null);
         if (cursor.moveToFirst()) {
             ShareAsDialogFragment.startShareIntent(this, cursor.getString(CURSOR_MDTEXT_POS), noteTitle);

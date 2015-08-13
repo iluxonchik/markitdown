@@ -30,6 +30,9 @@ public class NotesFragment extends ListFragment implements ShareAsDialogFragment
     private MarkItDownDbHelper dbHelper;
     private SQLiteDatabase readableDb;
 
+    private final int CURSOR_TITLE_POS = 0;
+    private final int CURSOR_CONTENT_POS = 1;
+
     public NotesFragment() {
 
     }
@@ -117,18 +120,22 @@ public class NotesFragment extends ListFragment implements ShareAsDialogFragment
                 switch (item.getItemId()) {
                     case (R.id.view_note):
                         intent = new Intent(getActivity(), ViewNoteActivity.class);
-                        intent.putExtra(ViewNoteActivity.EXTRA_NOTE_ID, getSelectedItemId());
+                        intent.putExtra(ViewNoteActivity.EXTRA_NOTE_ID, getSingleSelectedItemId());
                         startActivity(intent);
                         break;
                     case (R.id.share_note):
-                        new ShareAsDialogFragment().show(getFragmentManager(), null);
+                        ShareAsDialogFragment shareAsDialogFragment = new ShareAsDialogFragment();
+                        shareAsDialogFragment.registerOnOptionSelectedListener(NotesFragment.this);
+                        shareAsDialogFragment.show(getFragmentManager(), null);
                         break;
-                    case(R.id.edit_note):
+                    case (R.id.edit_note):
+                        intent = new Intent(getActivity(), EditNoteActivity.class);
+                        intent.putExtra(EditNoteActivity.NOTE_ID_ARG, getSingleSelectedItemId());
+                        startActivity(intent);
                         break;
-                    case(R.id.delete_note):
+                    case (R.id.delete_note):
                         break;
                 }
-
                 return false;
             }
 
@@ -137,11 +144,12 @@ public class NotesFragment extends ListFragment implements ShareAsDialogFragment
 
             }
 
-            private int getSelectedItemId() {
-                long[] checkedItemIds = listView.getCheckedItemIds();
-                return (int)checkedItemIds[0];
-            }
         });
+    }
+
+    private int getSingleSelectedItemId() {
+        long[] checkedItemIds = getListView().getCheckedItemIds();
+        return (int)checkedItemIds[0];
     }
 
     @Override
@@ -158,10 +166,33 @@ public class NotesFragment extends ListFragment implements ShareAsDialogFragment
     @Override
     public void onHTMLClicked(DialogFragment dialog) {
         // Share note as HTML
+        Cursor cursor = getNoteContentsCursor(MarkItDownDbContract.Notes.COLUMN_NAME_TEXT_HTML);
+
+        if (cursor.moveToFirst()) {
+            startShareIntent(cursor);
+        }
     }
 
     @Override
     public void onMarkdownClicked(DialogFragment dialog) {
         // Share note as Markdown
+        Cursor cursor = getNoteContentsCursor(MarkItDownDbContract.Notes.COLUMN_NAME_TEXT_MARKDOWN);
+
+        if (cursor.moveToFirst()) {
+            startShareIntent(cursor);
+        }
+
+    }
+
+    private void startShareIntent(Cursor cursor) {
+        ShareAsDialogFragment.startShareIntent(getActivity(),cursor.getString(CURSOR_CONTENT_POS),
+                cursor.getString(CURSOR_CONTENT_POS));
+    }
+
+    private Cursor getNoteContentsCursor(String contentColumnName) {
+        return readableDb.query(MarkItDownDbContract.Notes.TABLE_NAME,
+                new String[]{MarkItDownDbContract.Notes.COLUMN_NAME_TITLE,
+                        contentColumnName}, "_id = ?",
+                new String[]{Integer.toString(getSingleSelectedItemId())}, null, null, null, null);
     }
 }
