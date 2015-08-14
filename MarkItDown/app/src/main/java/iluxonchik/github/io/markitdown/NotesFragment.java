@@ -2,11 +2,16 @@ package iluxonchik.github.io.markitdown;
 
 import android.app.DialogFragment;
 import android.app.ListFragment;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -21,13 +26,26 @@ public class NotesFragment extends ListFragment implements ShareAsDialogFragment
 
     private MarkItDownDbHelper dbHelper;
     private SQLiteDatabase readableDb;
+    private TaggableCursorAdapter cursorAdapter;
 
     private final int CURSOR_TITLE_POS = 0;
     private final int CURSOR_CONTENT_POS = 1;
 
+    private final String NOTESFRAGMENT_LOGCAT_TAG = "NotesFragment";
+
     public NotesFragment() {
 
     }
+
+    BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Broadcast from DeleteService
+            cursorAdapter.swapCursor(createNotesListCursor());
+            Log.d(NOTESFRAGMENT_LOGCAT_TAG, "Note deleted!");
+        }
+    };
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -38,12 +56,8 @@ public class NotesFragment extends ListFragment implements ShareAsDialogFragment
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        Cursor cursor = readableDb.query(MarkItDownDbContract.Notes.TABLE_NAME,
-                new String[]{MarkItDownDbContract.Notes._ID, MarkItDownDbContract.Notes.COLUMN_NAME_TITLE,
-                        MarkItDownDbContract.Notes.COLUMN_NAME_DATE_SAVED},
-                null, null, null, null, null);
-
-        TaggableCursorAdapter cursorAdapter = new TaggableCursorAdapter(inflater.getContext(), cursor, 0);
+        Cursor cursor = createNotesListCursor();
+        cursorAdapter = new TaggableCursorAdapter(inflater.getContext(), cursor, 0);
         setListAdapter(cursorAdapter);
         return super.onCreateView(inflater, container, savedInstanceState);
     }
@@ -125,7 +139,8 @@ public class NotesFragment extends ListFragment implements ShareAsDialogFragment
                         startActivity(intent);
                         break;
                     case (R.id.delete_note):
-
+                        // TODO: Show dialog asking if user is sure about deletion
+                        deleteSelectedNotes();
                         break;
                 }
                 return false;
@@ -137,6 +152,26 @@ public class NotesFragment extends ListFragment implements ShareAsDialogFragment
             }
 
         });
+    }
+
+    private void deleteSelectedNotes() {
+        long[] checkedItemIds = getListView().getCheckedItemIds();
+        for (long id : checkedItemIds)
+        {
+            DeleteService.startActionDeleteNote(getActivity(), (int)id);
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(broadcastReceiver, new IntentFilter(DeleteService.ACTION_DELETE_NOTE));
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
     }
 
     private int getSingleSelectedItemId() {
@@ -186,5 +221,13 @@ public class NotesFragment extends ListFragment implements ShareAsDialogFragment
                 new String[]{MarkItDownDbContract.Notes.COLUMN_NAME_TITLE,
                         contentColumnName}, "_id = ?",
                 new String[]{Integer.toString(getSingleSelectedItemId())}, null, null, null, null);
+    }
+
+    public Cursor createNotesListCursor() {
+        return  readableDb.query(MarkItDownDbContract.Notes.TABLE_NAME,
+                new String[]{MarkItDownDbContract.Notes._ID, MarkItDownDbContract.Notes.COLUMN_NAME_TITLE,
+                        MarkItDownDbContract.Notes.COLUMN_NAME_DATE_SAVED},
+                null, null, null, null, null);
+
     }
 }

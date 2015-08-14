@@ -12,8 +12,8 @@ import android.util.Log;
  */
 public class DeleteService extends IntentService {
 
-    private static final String ACTION_DELETE_NOTE = "iluxonchik.github.io.markitdown.action.DLETE_NOTE";
-    private static final String ACTION_DELETE_NOTEBOOK = "iluxonchik.github.io.markitdown.action.DELETE_NOTEBOOK";
+    public static final String ACTION_DELETE_NOTE = "iluxonchik.github.io.markitdown.action.DLETE_NOTE";
+    public static final String ACTION_DELETE_NOTEBOOK = "iluxonchik.github.io.markitdown.action.DELETE_NOTEBOOK";
 
     private static final String EXTRA_NOTE_ID = "iluxonchik.github.io.markitdown.extra.NOTE_ID";
     private static final String EXTRA_NOTEBOOK_ID = "iluxonchik.github.io.markitdown.extra.NOTEBOOK_ID";
@@ -44,8 +44,7 @@ public class DeleteService extends IntentService {
      *
      * @see IntentService
      */
-    // TODO: Customize helper method
-    public static void startActionBaz(Context context, int notebookId) {
+    public static void startActionDeleteNotebook(Context context, int notebookId) {
         Intent intent = new Intent(context, DeleteService.class);
         intent.setAction(ACTION_DELETE_NOTEBOOK);
         intent.putExtra(EXTRA_NOTEBOOK_ID, notebookId);

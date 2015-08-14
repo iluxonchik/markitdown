@@ -61,14 +61,11 @@ public class MarkdownToHTMLService extends IntentService {
 
         int isNoteEdited = cursor.getInt(EDITED_POS);
         if (isNoteEdited == FALSE) {
-            // TODO: broadcast that note is updated
+            // note is updated
             Log.d(MD_TO_HTML_SERVICE_LOGTAG, "Note has an updated HTML");
             LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(ACTION_COMPLETE));
             return;
         }
-
-        // TODO: convert md to html, store html in db, set edited column val to 0, broadcast that
-        // note is updated.
 
         // Get markdown text
         cursor = readableDb.query(MarkItDownDbContract.Notes.TABLE_NAME,
