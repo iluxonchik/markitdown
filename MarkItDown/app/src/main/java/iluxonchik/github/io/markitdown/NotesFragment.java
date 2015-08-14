@@ -1,9 +1,11 @@
 package iluxonchik.github.io.markitdown;
 
+import android.app.AlertDialog;
 import android.app.DialogFragment;
 import android.app.ListFragment;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
@@ -139,8 +141,7 @@ public class NotesFragment extends ListFragment implements ShareAsDialogFragment
                         startActivity(intent);
                         break;
                     case (R.id.delete_note):
-                        // TODO: Show dialog asking if user is sure about deletion
-                        deleteSelectedNotes();
+                        handleNoteDeletion();
                         break;
                 }
                 return false;
@@ -152,6 +153,26 @@ public class NotesFragment extends ListFragment implements ShareAsDialogFragment
             }
 
         });
+    }
+
+    private void handleNoteDeletion() {
+        /*
+          Show a dialog asking if the user is sure about note(s) deletion, in case he is,
+          remove the selected note(s).
+         */
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setPositiveButton(R.string.dialog_yes, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                deleteSelectedNotes();
+            }
+        });
+        builder.setNegativeButton(R.string.dialog_no, null);
+        setAlertDialogText(builder);
+
+        builder.create().show();
+
     }
 
     private void deleteSelectedNotes() {
@@ -229,5 +250,24 @@ public class NotesFragment extends ListFragment implements ShareAsDialogFragment
                         MarkItDownDbContract.Notes.COLUMN_NAME_DATE_SAVED},
                 null, null, null, null, null);
 
+    }
+
+    public void setAlertDialogText(AlertDialog.Builder builder) {
+        int titleResId;
+        int messageResId;
+        int numSelectedNotes = getListView().getCheckedItemCount();
+
+        if (numSelectedNotes > 1) {
+            // More than one note selected for deletion
+            titleResId = R.string.dialog_delete_multiple_notes_question;
+            messageResId = R.string.dialog_delete_single_note_text;
+        } else {
+            // Single note for deletion selected
+            titleResId = R.string.dialog_delete_single_note_question;
+            messageResId = R.string.dialog_delete_single_note_text;
+        }
+
+        builder.setTitle(getResources().getString(titleResId));
+        builder.setMessage(getResources().getString(messageResId) + " " + getResources().getString(R.string.dialog_action_cannot_be_undone));
     }
 }

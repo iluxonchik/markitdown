@@ -28,6 +28,12 @@
     <string name="dialog_save_note_title">Save note?</string>
     <string name="dialog_yes">Yes</string>
     <string name="dialog_no">No</string>
+    <string name="dialog_delete_multiple_notes_question">Delete selected notes?</string>
+    <string name="dialog_delete_single_note_question">Delete selected notes?</string>
+    <string name="dialog_delete_single_note_text">Are you sure you want to delete the selected note?</string>
+    <string name="dialog_delete_multiple_notes_text">Are you sure you want to delete the selected notes?</string>
+    <string name="dialog_action_cannot_be_undone">This action cannot be undone.</string>
+
 
     <string name="share_note_action_text">Share this note via</string>
 
