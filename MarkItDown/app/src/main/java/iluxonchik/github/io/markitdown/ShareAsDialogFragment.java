@@ -1,6 +1,7 @@
 package iluxonchik.github.io.markitdown;
 
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -62,6 +63,18 @@ public class ShareAsDialogFragment extends DialogFragment{
             }
         });
         return alertDialogBuilder.create();
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        try {
+            registerOnOptionSelectedListener((OnShareAsOptionSelectedListener)activity);
+
+        } catch (ClassCastException e) {
+            throw new ClassCastException("Activity that uses "+ this.getClass().getCanonicalName() + " must implement " +
+                    OnShareAsOptionSelectedListener.class.getCanonicalName());
+        }
+        super.onAttach(activity);
     }
 
     public static void startShareIntent(Context context, String shareTextContent, String shareTextTitle) {

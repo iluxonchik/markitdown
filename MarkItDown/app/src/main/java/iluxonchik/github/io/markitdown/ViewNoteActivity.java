@@ -108,23 +108,9 @@ public class ViewNoteActivity extends Activity implements ShareAsDialogFragment.
         super.onResume();
         IntentFilter filter = new IntentFilter(MarkdownToHTMLService.ACTION_COMPLETE);
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter);
-        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter);
 
         if (cameFromPausedState)
             new EditCheckTask().execute(noteId);
-
-        ShareAsDialogFragment shareAsDialogFragment = (ShareAsDialogFragment) getFragmentManager().findFragmentByTag(SHARE_DIALOG_TAG);
-
-        if (shareAsDialogFragment != null) {
-            /*
-             * When shown, the dialog fragment is tagged. If a fragment with SHARE_DIALOG_TAG is found
-              * then the re-register the listener, since the activity probably has been re-created.
-              * (It's possible to check whether it was really recreated or came from, for example,
-              * onRestart(), but since the operation is a simple pointer assignment, it's not expensive
-              * in terms of performance.
-             */
-            shareAsDialogFragment.registerOnOptionSelectedListener(this);
-        }
     }
 
     @Override
@@ -186,7 +172,6 @@ public class ViewNoteActivity extends Activity implements ShareAsDialogFragment.
 
     private void showShareAsDialog() {
         ShareAsDialogFragment shareAsDialogFragment = new ShareAsDialogFragment();
-        shareAsDialogFragment.registerOnOptionSelectedListener(this);
         shareAsDialogFragment.show(getFragmentManager(), SHARE_DIALOG_TAG);
     }
 

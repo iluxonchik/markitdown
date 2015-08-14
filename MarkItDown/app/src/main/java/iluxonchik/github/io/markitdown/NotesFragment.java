@@ -1,14 +1,11 @@
 package iluxonchik.github.io.markitdown;
 
-import android.app.Activity;
 import android.app.DialogFragment;
 import android.app.ListFragment;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.net.Uri;
 import android.os.Bundle;
-import android.app.Fragment;
 import android.util.Log;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
@@ -18,12 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
-import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
-import android.widget.Toast;
-
-import java.util.zip.Inflater;
 
 public class NotesFragment extends ListFragment implements ShareAsDialogFragment.OnShareAsOptionSelectedListener{
 
@@ -125,7 +117,6 @@ public class NotesFragment extends ListFragment implements ShareAsDialogFragment
                         break;
                     case (R.id.share_note):
                         ShareAsDialogFragment shareAsDialogFragment = new ShareAsDialogFragment();
-                        shareAsDialogFragment.registerOnOptionSelectedListener(NotesFragment.this);
                         shareAsDialogFragment.show(getFragmentManager(), null);
                         break;
                     case (R.id.edit_note):

@@ -4,6 +4,7 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 /**
@@ -83,6 +84,8 @@ public class DeleteService extends IntentService {
         writableDb = dbHelper.getWritableDatabase();
         // Remove note references from "Notes" table
         deleteFromNotesTable(noteId);
+
+        LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(ACTION_DELETE_NOTE));
     }
 
     /**
