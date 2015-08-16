@@ -61,7 +61,8 @@ public class NotesFragment extends ListFragment implements ShareAsDialogFragment
         Cursor cursor = createNotesListCursor();
         cursorAdapter = new TaggableCursorAdapter(inflater.getContext(), cursor, 0);
         setListAdapter(cursorAdapter);
-        return super.onCreateView(inflater, container, savedInstanceState);
+        return inflater.inflate(R.layout.fragment_notes_list, container, false);
+        //return super.onCreateView(inflater, container, savedInstanceState);
     }
 
     @Override
