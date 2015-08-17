@@ -1,5 +1,6 @@
 package iluxonchik.github.io.markitdown;
 
+import android.app.Activity;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.app.DialogFragment;
@@ -21,16 +22,21 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
 import android.widget.AbsListView;
 import android.widget.ListView;
 
 public class NotesFragment extends ListFragment implements ShareAsDialogFragment.OnShareAsOptionSelectedListener{
 
+    public interface OnCABStatusChangedListener {
+        void onCABCreate();
+        void onCABDestroy();
+    }
+
     private MarkItDownDbHelper dbHelper;
     private SQLiteDatabase readableDb;
     private TaggableCursorAdapter cursorAdapter;
     private FloatingActionButton newNoteFAB;
+    private OnCABStatusChangedListener onCABStatusChangedListener;
 
     private final int CURSOR_TITLE_POS = 0;
     private final int CURSOR_CONTENT_POS = 1;
@@ -94,9 +100,7 @@ public class NotesFragment extends ListFragment implements ShareAsDialogFragment
 
             @Override
             public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
-                Log.d("CAT", "onCheckedStateChanged. Number of checked items: " + listView.getCheckedItemCount() );
-
-                if(listView.getCheckedItemCount() == 0) { mode.finish(); }
+                Log.d("CAT", "onCheckedStateChanged. Number of checked items: " + listView.getCheckedItemCount());
 
                 // TODO: REFRACTOR nested if's
                 if (multipleItemsChecked) {
@@ -123,6 +127,7 @@ public class NotesFragment extends ListFragment implements ShareAsDialogFragment
                 MenuInflater menuInflater = mode.getMenuInflater();
                 menuInflater.inflate(R.menu.menu_notes_context, menu);
                 newNoteFAB.hide();
+                onCABStatusChangedListener.onCABCreate();
                 return true;
             }
 
@@ -148,6 +153,7 @@ public class NotesFragment extends ListFragment implements ShareAsDialogFragment
                     case (R.id.view_note):
                         intent = new Intent(getActivity(), ViewNoteActivity.class);
                         intent.putExtra(ViewNoteActivity.EXTRA_NOTE_ID, getSingleSelectedItemId());
+                        mode.finish();
                         startActivity(intent);
                         break;
                     case (R.id.share_note):
@@ -157,6 +163,7 @@ public class NotesFragment extends ListFragment implements ShareAsDialogFragment
                     case (R.id.edit_note):
                         intent = new Intent(getActivity(), EditNoteActivity.class);
                         intent.putExtra(EditNoteActivity.NOTE_ID_ARG, getSingleSelectedItemId());
+                        mode.finish();
                         startActivity(intent);
                         break;
                     case (R.id.delete_note):
@@ -170,6 +177,7 @@ public class NotesFragment extends ListFragment implements ShareAsDialogFragment
             public void onDestroyActionMode(ActionMode mode) {
                 // TODO: tell activity to enable drawer layout
                 newNoteFAB.show();
+                onCABStatusChangedListener.onCABDestroy();
             }
 
         });
@@ -218,6 +226,18 @@ public class NotesFragment extends ListFragment implements ShareAsDialogFragment
     public void onPause() {
         super.onPause();
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        try {
+            onCABStatusChangedListener = (OnCABStatusChangedListener)activity;
+
+        } catch (ClassCastException e) {
+            throw new ClassCastException("Activity that uses "+ this.getClass().getCanonicalName() + " must implement " +
+                    OnCABStatusChangedListener.class.getCanonicalName());
+        }
+        super.onAttach(activity);
     }
 
     private int getSingleSelectedItemId() {

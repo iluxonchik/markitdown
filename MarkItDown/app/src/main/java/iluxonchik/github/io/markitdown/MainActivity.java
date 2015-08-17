@@ -20,7 +20,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements NotesFragment.OnCABStatusChangedListener{
 
     private final String TOP_FRAGMENT_TAG = "TopFragment";
     private final String CURR_POSITION = "currentPosition";
@@ -265,5 +265,17 @@ public class MainActivity extends AppCompatActivity {
             title = drawerOptions[position];
         }
         getSupportActionBar().setTitle(title);
+    }
+
+    @Override
+    public void onCABCreate() {
+        // Disable drawer layout
+        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+    }
+
+    @Override
+    public void onCABDestroy() {
+        // Enable drawer layout
+        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
     }
 }
