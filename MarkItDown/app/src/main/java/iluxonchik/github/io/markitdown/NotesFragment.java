@@ -1,6 +1,7 @@
 package iluxonchik.github.io.markitdown;
 
-import android.app.AlertDialog;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.AlertDialog;
 import android.app.DialogFragment;
 import android.app.ListFragment;
 import android.content.BroadcastReceiver;
@@ -13,7 +14,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import android.util.SparseBooleanArray;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -21,6 +21,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
 import android.widget.AbsListView;
 import android.widget.ListView;
 
@@ -29,6 +30,7 @@ public class NotesFragment extends ListFragment implements ShareAsDialogFragment
     private MarkItDownDbHelper dbHelper;
     private SQLiteDatabase readableDb;
     private TaggableCursorAdapter cursorAdapter;
+    private FloatingActionButton newNoteFAB;
 
     private final int CURSOR_TITLE_POS = 0;
     private final int CURSOR_CONTENT_POS = 1;
@@ -58,10 +60,19 @@ public class NotesFragment extends ListFragment implements ShareAsDialogFragment
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        Cursor cursor = createNotesListCursor();
-        cursorAdapter = new TaggableCursorAdapter(inflater.getContext(), cursor, 0);
-        setListAdapter(cursorAdapter);
-        return inflater.inflate(R.layout.fragment_notes_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_notes_list, container, false);
+
+        newNoteFAB = (FloatingActionButton) view.findViewById(R.id.newNoteFAB);
+        newNoteFAB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(getActivity(), EditNoteActivity.class);
+                i.putExtra(EditNoteActivity.NOTE_ID_ARG, -1);
+                startActivity(i);
+            }
+        });
+
+        return view;
         //return super.onCreateView(inflater, container, savedInstanceState);
     }
 
@@ -69,9 +80,11 @@ public class NotesFragment extends ListFragment implements ShareAsDialogFragment
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         final ListView listView = getListView();
-    listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+        listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
         //listView.setSelector(R.drawable.list_selector);
         listView.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
+
+            // TODO: Disable drawer layout when CAB is active
 
             private final int VIEW_MENU_POS = 0;
             private final int EDIT_MENU_POS = 1;
@@ -81,7 +94,10 @@ public class NotesFragment extends ListFragment implements ShareAsDialogFragment
 
             @Override
             public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
-                Log.d("CAT", "onCheckedStateChanged");
+                Log.d("CAT", "onCheckedStateChanged. Number of checked items: " + listView.getCheckedItemCount() );
+
+                if(listView.getCheckedItemCount() == 0) { mode.finish(); }
+
                 // TODO: REFRACTOR nested if's
                 if (multipleItemsChecked) {
                     if (listView.getCheckedItemCount() == 1) {
@@ -102,9 +118,11 @@ public class NotesFragment extends ListFragment implements ShareAsDialogFragment
             @Override
             public boolean onCreateActionMode(ActionMode mode, Menu menu) {
                 // Inflate menu
+                // TODO: tell activity to disable drawer layout
                 Log.d("CAT", "onCreateActionMode");
                 MenuInflater menuInflater = mode.getMenuInflater();
                 menuInflater.inflate(R.menu.menu_notes_context, menu);
+                newNoteFAB.hide();
                 return true;
             }
 
@@ -150,10 +168,13 @@ public class NotesFragment extends ListFragment implements ShareAsDialogFragment
 
             @Override
             public void onDestroyActionMode(ActionMode mode) {
-
+                // TODO: tell activity to enable drawer layout
+                newNoteFAB.show();
             }
 
         });
+
+
     }
 
     private void handleNoteDeletion() {
@@ -187,6 +208,9 @@ public class NotesFragment extends ListFragment implements ShareAsDialogFragment
     @Override
     public void onResume() {
         super.onResume();
+        Cursor cursor = createNotesListCursor();
+        cursorAdapter = new TaggableCursorAdapter(getActivity(), cursor, 0);
+        setListAdapter(cursorAdapter);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(broadcastReceiver, new IntentFilter(DeleteService.ACTION_DELETE_NOTE));
     }
 
