@@ -10,6 +10,8 @@ import android.content.res.Configuration;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,7 +20,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 
-public class MainActivity extends Activity {
+public class MainActivity extends AppCompatActivity {
 
     private final String TOP_FRAGMENT_TAG = "TopFragment";
     private final String CURR_POSITION = "currentPosition";
@@ -36,6 +38,10 @@ public class MainActivity extends Activity {
 
         // TODO: remove line later, only for testing purposes.
         //deleteDatabase(MarkItDownDbContract.DB_NAME);
+
+        // Set the Toolbar to be the ActionBar
+        Toolbar toolbar = (Toolbar)findViewById(R.id.appToolbar);
+        setSupportActionBar(toolbar);
 
         drawerOptions = getResources().getStringArray(R.array.drawer_options);
         drawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
@@ -61,8 +67,8 @@ public class MainActivity extends Activity {
 
         drawerLayout.setDrawerListener(drawerToggle);
 
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
 
         // Set the adapter on the ListView
         drawerList.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_activated_1,
@@ -136,7 +142,6 @@ public class MainActivity extends Activity {
     public boolean onPrepareOptionsMenu(Menu menu) {
         // If the drawer is open, hide the "Share As" option from the menu
         boolean isDrawerOpen = drawerLayout.isDrawerOpen(drawerList);
-        menu.findItem(R.id.action_shareAs).setVisible(!isDrawerOpen);
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -177,10 +182,6 @@ public class MainActivity extends Activity {
 
         // Handle other action bar items clicks
        switch (item.getItemId()) {
-           case R.id.action_shareAs:
-               displaySaveAsDialog();
-               return true;
-
            default:
              return  super.onOptionsItemSelected(item);
        }
@@ -263,6 +264,6 @@ public class MainActivity extends Activity {
         else {
             title = drawerOptions[position];
         }
-        getActionBar().setTitle(title);
+        getSupportActionBar().setTitle(title);
     }
 }

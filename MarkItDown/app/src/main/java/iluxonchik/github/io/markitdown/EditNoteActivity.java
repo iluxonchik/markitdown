@@ -10,6 +10,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -28,7 +30,7 @@ import java.util.Calendar;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class EditNoteActivity extends Activity implements SaveNoteDialogFragment.SaveNoteDialogListener {
+public class EditNoteActivity extends AppCompatActivity implements SaveNoteDialogFragment.SaveNoteDialogListener {
 
     public static final String NOTE_ID_ARG = "noteId";
     private final String NOTE_TITLE = "noteTitle";
@@ -57,7 +59,12 @@ public class EditNoteActivity extends Activity implements SaveNoteDialogFragment
         readableDb = dbHelper.getReadableDatabase();
         textChanged = false;
 
-        ActionBar actionBar = getActionBar();
+
+        // Set the Toolbar to be the ActionBar
+        Toolbar toolbar = (Toolbar)findViewById(R.id.appToolbar);
+        setSupportActionBar(toolbar);
+
+        android.support.v7.app.ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
 
         noteTitle = (EditText)findViewById(R.id.note_title);

@@ -12,13 +12,15 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.support.v4.content.LocalBroadcastManager;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.webkit.WebView;
 import android.widget.TextView;
 
-public class ViewNoteActivity extends Activity implements ShareAsDialogFragment.OnShareAsOptionSelectedListener {
+public class ViewNoteActivity extends AppCompatActivity implements ShareAsDialogFragment.OnShareAsOptionSelectedListener {
 
     private final String VIEW_NOTE_ACTIVITY_LOGTAG = "ViewNoteActivity";
     private final String SHARE_DIALOG_TAG = "ShareDialog";
@@ -79,6 +81,11 @@ public class ViewNoteActivity extends Activity implements ShareAsDialogFragment.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_note);
 
+
+        // Set the Toolbar to be the ActionBar
+        Toolbar toolbar = (Toolbar)findViewById(R.id.appToolbar);
+        setSupportActionBar(toolbar);
+
         noteId = getIntent().getIntExtra(EXTRA_NOTE_ID, NULL_NOTE);
 
         dbHelper = new MarkItDownDbHelper(this);
@@ -98,7 +105,7 @@ public class ViewNoteActivity extends Activity implements ShareAsDialogFragment.
         } else {
              showNote();
         }
-        ActionBar actionBar = getActionBar();
+        android.support.v7.app.ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setTitle(getString(R.string.view_note_activity_title));
     }
