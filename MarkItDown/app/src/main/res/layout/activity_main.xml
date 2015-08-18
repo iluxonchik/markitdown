@@ -30,7 +30,7 @@
     </LinearLayout>
 
 
-    <!-- navigation drawer (the list) -->
+    <!-- navigation drawer  -->
     <LinearLayout
         android:id="@+id/navigation_drawer"
         android:orientation="vertical"
@@ -40,6 +40,11 @@
         android:background="#ffffff"
         >
 
+        <!--header -->
+        <include layout="@layout/header" />
+
+
+        <!-- listview with options  -->
         <ListView
             android:id="@+id/drawer_list"
             android:layout_width="match_parent"
