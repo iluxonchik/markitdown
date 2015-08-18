@@ -17,6 +17,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 
 
@@ -28,6 +29,7 @@ public class MainActivity extends AppCompatActivity implements NotesFragment.OnC
     private String[] drawerOptions;
     private DrawerLayout drawerLayout;
     private ListView drawerList;
+    private LinearLayout navigationDrawer;
     private ActionBarDrawerToggle drawerToggle;
     private int currentPosition = 0;
 
@@ -45,7 +47,8 @@ public class MainActivity extends AppCompatActivity implements NotesFragment.OnC
 
         drawerOptions = getResources().getStringArray(R.array.drawer_options);
         drawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
-        drawerList = (ListView)findViewById(R.id.drawer);
+        navigationDrawer = (LinearLayout)findViewById(R.id.navigation_drawer);
+        drawerList = (ListView)drawerLayout.findViewById(R.id.drawer_list);
 
         // DrawerListener - listens to drawer's open and close events
         drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.drawer_open,
@@ -141,7 +144,7 @@ public class MainActivity extends AppCompatActivity implements NotesFragment.OnC
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         // If the drawer is open, hide the "Share As" option from the menu
-        boolean isDrawerOpen = drawerLayout.isDrawerOpen(drawerList);
+        boolean isDrawerOpen = drawerLayout.isDrawerOpen(navigationDrawer);
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -237,7 +240,7 @@ public class MainActivity extends AppCompatActivity implements NotesFragment.OnC
         // Highlight the selected item, update the title and close the drawer
         drawerList.setItemChecked(position, true);
         updateActionBarTitle(position);
-        drawerLayout.closeDrawer(drawerList);
+        drawerLayout.closeDrawer(navigationDrawer);
 
     }
 
