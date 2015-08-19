@@ -43,7 +43,7 @@
         <!--header -->
         <include layout="@layout/header" />
 
-
+        <!-- TODO: Add icons before listview items -->
         <!-- listview with options  -->
         <ListView
             android:id="@+id/drawer_list"

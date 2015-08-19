@@ -12,7 +12,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 
-public class TaggableCursorAdapter extends CursorAdapter {
+public class NotesListCursorAdapter extends CursorAdapter {
 
 
 
@@ -21,7 +21,7 @@ public class TaggableCursorAdapter extends CursorAdapter {
     private final int DATE_POS = 2;
     private final String DATE_FORMAT = "dd-MM-yyyy HH:mm"; // TODO: allow user to personalize (store in preferences (?))
 
-    public TaggableCursorAdapter(Context context, Cursor c, int flags) {
+    public NotesListCursorAdapter(Context context, Cursor c, int flags) {
         super(context, c, flags);
     }
 

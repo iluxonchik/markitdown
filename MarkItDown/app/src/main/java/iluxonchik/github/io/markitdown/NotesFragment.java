@@ -34,7 +34,7 @@ public class NotesFragment extends ListFragment implements ShareAsDialogFragment
 
     private MarkItDownDbHelper dbHelper;
     private SQLiteDatabase readableDb;
-    private TaggableCursorAdapter cursorAdapter;
+    private NotesListCursorAdapter cursorAdapter;
     private FloatingActionButton newNoteFAB;
     private OnCABStatusChangedListener onCABStatusChangedListener;
 
@@ -185,6 +185,17 @@ public class NotesFragment extends ListFragment implements ShareAsDialogFragment
 
     }
 
+    @Override
+    public void onDestroy() {
+        if (readableDb != null) {
+            readableDb.close();
+        }
+
+        if (dbHelper != null) {
+            dbHelper.close();
+        }
+    }
+
     private void handleNoteDeletion() {
         /*
           Show a dialog asking if the user is sure about note(s) deletion, in case he is,
@@ -217,7 +228,7 @@ public class NotesFragment extends ListFragment implements ShareAsDialogFragment
     public void onResume() {
         super.onResume();
         Cursor cursor = createNotesListCursor();
-        cursorAdapter = new TaggableCursorAdapter(getActivity(), cursor, 0);
+        cursorAdapter = new NotesListCursorAdapter(getActivity(), cursor, 0);
         setListAdapter(cursorAdapter);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(broadcastReceiver, new IntentFilter(DeleteService.ACTION_DELETE_NOTE));
     }
