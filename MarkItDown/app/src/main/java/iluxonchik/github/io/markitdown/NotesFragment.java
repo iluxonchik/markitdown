@@ -4,14 +4,12 @@ import android.app.Activity;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.app.DialogFragment;
-import android.app.ListFragment;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -25,15 +23,13 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.ListView;
 
-public class NotesFragment extends ListFragment implements ShareAsDialogFragment.OnShareAsOptionSelectedListener{
+public class NotesFragment extends DatabaseListFragment implements ShareAsDialogFragment.OnShareAsOptionSelectedListener{
 
     public interface OnCABStatusChangedListener {
         void onCABCreate();
         void onCABDestroy();
     }
 
-    private MarkItDownDbHelper dbHelper;
-    private SQLiteDatabase readableDb;
     private NotesListCursorAdapter cursorAdapter;
     private FloatingActionButton newNoteFAB;
     private OnCABStatusChangedListener onCABStatusChangedListener;
@@ -47,7 +43,7 @@ public class NotesFragment extends ListFragment implements ShareAsDialogFragment
 
     }
 
-    BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             // Broadcast from DeleteService
@@ -60,15 +56,14 @@ public class NotesFragment extends ListFragment implements ShareAsDialogFragment
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        dbHelper = new MarkItDownDbHelper(getActivity());
-        readableDb = dbHelper.getReadableDatabase();
+        openDatabase();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_notes_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_items_list, container, false);
 
-        newNoteFAB = (FloatingActionButton) view.findViewById(R.id.newNoteFAB);
+        newNoteFAB = (FloatingActionButton) view.findViewById(R.id.addItemFAB);
         newNoteFAB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -89,9 +84,6 @@ public class NotesFragment extends ListFragment implements ShareAsDialogFragment
         listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
         //listView.setSelector(R.drawable.list_selector);
         listView.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
-
-            // TODO: Disable drawer layout when CAB is active
-
             private final int VIEW_MENU_POS = 0;
             private final int EDIT_MENU_POS = 1;
             private final int SHARE_MENU_POS = 2;
@@ -187,13 +179,8 @@ public class NotesFragment extends ListFragment implements ShareAsDialogFragment
 
     @Override
     public void onDestroy() {
-        if (readableDb != null) {
-            readableDb.close();
-        }
-
-        if (dbHelper != null) {
-            dbHelper.close();
-        }
+        closeDatabase();
+        super.onDestroy();
     }
 
     private void handleNoteDeletion() {
