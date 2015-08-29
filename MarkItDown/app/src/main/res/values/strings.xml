@@ -34,6 +34,10 @@
     <string name="dialog_delete_multiple_notes_text">Are you sure you want to delete the selected notes?</string>
     <string name="dialog_action_cannot_be_undone">This action cannot be undone.</string>
 
+    <string name="dialog_new_notebook_title">Create Notebook</string>
+    <string name="dialog_new_notebook_hint">Name</string>
+    <string name="dialog_new_notebook_color_text">Color</string>
+
 
     <string name="share_note_action_text">Share this note via</string>
 

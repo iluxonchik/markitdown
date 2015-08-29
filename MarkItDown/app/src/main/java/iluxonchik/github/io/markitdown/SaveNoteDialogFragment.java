@@ -11,7 +11,7 @@ import java.security.PublicKey;
 import java.util.ArrayList;
 
 /**
- * Created by ILUXONCHIK on 01/08/2015.
+ * A dialog that asks whetehr the user wants to save the edited note.
  */
 public class SaveNoteDialogFragment extends DialogFragment {
 
@@ -20,8 +20,8 @@ public class SaveNoteDialogFragment extends DialogFragment {
     }
 
     public interface SaveNoteDialogListener {
-        public void onDialogPositiveClick(DialogFragment dialog);
-        public void onDialogNegativeClick(DialogFragment dialog);
+        void onDialogPositiveClick(DialogFragment dialog);
+        void onDialogNegativeClick(DialogFragment dialog);
     }
 
     private ArrayList<SaveNoteDialogListener> listeners;
