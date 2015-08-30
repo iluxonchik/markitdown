@@ -21,6 +21,7 @@
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:layout_gravity="left" />
         <ImageView
+            android:id="@+id/notebookColor"
             android:layout_marginLeft="6dp"
             android:layout_width="100dp"
             android:layout_height="20dp"

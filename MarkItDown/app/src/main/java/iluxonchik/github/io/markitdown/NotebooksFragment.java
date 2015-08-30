@@ -1,11 +1,10 @@
 package iluxonchik.github.io.markitdown;
 
+import android.app.DialogFragment;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -14,10 +13,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
-import android.support.v7.app.AlertDialog;
-import android.widget.Toast;
 
-public class NotebooksFragment extends DatabaseListFragment {
+public class NotebooksFragment extends DatabaseListFragment implements PositiveNegativeListener{
 
     private FloatingActionButton newNotebookFAB;
 
@@ -49,31 +46,14 @@ public class NotebooksFragment extends DatabaseListFragment {
             @Override
             public void onClick(View v) {
                 // TODO: show create notebook dialog
-                Resources res = getResources();
-                AlertDialog.Builder builder = new AlertDialog.Builder(inflater.getContext());
-                AlertDialog dialog = builder.setView(R.layout.dialog_create_notebook)
-                        .setTitle(R.string.dialog_new_notebook_title)
-                        .setPositiveButton(res.getString(android.R.string.ok), new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
+                DialogFragment newNotebookDialog = new NewNotebookDialogFragment();
+                newNotebookDialog.setTargetFragment(NotebooksFragment.this, 0);
+                newNotebookDialog.show(getFragmentManager(), null);
 
-                            }
-                        })
-                        .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        }).create();
-                dialog.show();
             }
         });
 
         return v;
-    }
-
-    public void onSelectColorPress(View v) {
-        Toast.makeText(getActivity(), "Image", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -105,5 +85,15 @@ public class NotebooksFragment extends DatabaseListFragment {
         return readableDb.query(MarkItDownDbContract.Notebooks.TABLE_NAME,
                 new String[] {MarkItDownDbContract.Notebooks.COLUMN_NAME_TITLE, MarkItDownDbContract.Notebooks.COLUMN_NAME_COLOR},
                 null, null, null, null, null);
+    }
+
+    @Override
+    public void onDialogPositiveClick(DialogFragment dialog, Bundle args) {
+
+    }
+
+    @Override
+    public void onDialogNegativeClick(DialogFragment dialog, Bundle args) {
+
     }
 }

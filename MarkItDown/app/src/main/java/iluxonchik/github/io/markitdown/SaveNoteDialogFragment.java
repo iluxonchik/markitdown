@@ -16,15 +16,9 @@ import java.util.ArrayList;
 public class SaveNoteDialogFragment extends DialogFragment {
 
     public SaveNoteDialogFragment() {
-        listeners = new ArrayList<SaveNoteDialogListener>();
-    }
 
-    public interface SaveNoteDialogListener {
-        void onDialogPositiveClick(DialogFragment dialog);
-        void onDialogNegativeClick(DialogFragment dialog);
     }
-
-    private ArrayList<SaveNoteDialogListener> listeners;
+    private PositiveNegativeListener listener;
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -35,17 +29,14 @@ public class SaveNoteDialogFragment extends DialogFragment {
         .setPositiveButton(R.string.dialog_yes, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                for (SaveNoteDialogListener listener : listeners) {
-                    listener.onDialogPositiveClick(SaveNoteDialogFragment.this);
-                }
+                listener.onDialogPositiveClick(SaveNoteDialogFragment.this, null);
+
             }
         })
         .setNegativeButton(R.string.dialog_no, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                for (SaveNoteDialogListener listener : listeners) {
-                    listener.onDialogNegativeClick(SaveNoteDialogFragment.this);
-                }
+                listener.onDialogNegativeClick(SaveNoteDialogFragment.this, null);
             }
         });
 
@@ -55,10 +46,17 @@ public class SaveNoteDialogFragment extends DialogFragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
+
+        if(! (activity instanceof PositiveNegativeListener)) {
+            throw new ClassCastException("Starting activity must implement " +
+                    PositiveNegativeListener.class.getCanonicalName());
+        }
+
+        setOnDialogClickListener((PositiveNegativeListener) activity);
     }
 
-    public void addOnDialogClickListener(SaveNoteDialogListener listener) {
-        listeners.add(listener);
+    private void setOnDialogClickListener(PositiveNegativeListener listener) {
+        this.listener = listener;
     }
 
 }

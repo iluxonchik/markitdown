@@ -21,7 +21,8 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 
 
-public class MainActivity extends AppCompatActivity implements NotesFragment.OnCABStatusChangedListener{
+public class MainActivity extends AppCompatActivity
+        implements NotesFragment.OnCABStatusChangedListener {
 
     private final String TOP_FRAGMENT_TAG = "TopFragment";
     private final String CURR_POSITION = "currentPosition";
@@ -42,13 +43,13 @@ public class MainActivity extends AppCompatActivity implements NotesFragment.OnC
         //deleteDatabase(MarkItDownDbContract.DB_NAME);
 
         // Set the Toolbar to be the ActionBar
-        Toolbar toolbar = (Toolbar)findViewById(R.id.appToolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.appToolbar);
         setSupportActionBar(toolbar);
 
         drawerOptions = getResources().getStringArray(R.array.drawer_options);
-        drawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
-        navigationDrawer = (LinearLayout)findViewById(R.id.navigation_drawer);
-        drawerList = (ListView)drawerLayout.findViewById(R.id.drawer_list);
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        navigationDrawer = (LinearLayout) findViewById(R.id.navigation_drawer);
+        drawerList = (ListView) drawerLayout.findViewById(R.id.drawer_list);
 
         // DrawerListener - listens to drawer's open and close events
         drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.drawer_open,
@@ -184,17 +185,17 @@ public class MainActivity extends AppCompatActivity implements NotesFragment.OnC
         }
 
         // Handle other action bar items clicks
-       switch (item.getItemId()) {
-           default:
-             return  super.onOptionsItemSelected(item);
-       }
+        switch (item.getItemId()) {
+            default:
+                return super.onOptionsItemSelected(item);
+        }
 
     }
 
 
     private void displaySaveAsDialog() {
         DialogFragment shareAsDialog = new ShareAsDialogFragment();
-        shareAsDialog.show(getFragmentManager(),null);
+        shareAsDialog.show(getFragmentManager(), null);
     }
 
     private void selectItem(int position) {
@@ -223,8 +224,8 @@ public class MainActivity extends AppCompatActivity implements NotesFragment.OnC
                 inte.putExtra(ViewNoteActivity.EXTRA_NOTE_ID, 1);
                 startActivity(inte);
                 return;
-                //fragment = new TagsFragment();
-                //break;
+            //fragment = new TagsFragment();
+            //break;
             case 4:
                 // Settings
                 fragment = new SettingsFragment();
@@ -256,6 +257,7 @@ public class MainActivity extends AppCompatActivity implements NotesFragment.OnC
     /**
      * Update ActionBar's title based on the position of the item in the NavigationDrawer's
      * ListView.
+     *
      * @param position position of the item in the NavigationDrawer's ListView.
      */
     private void updateActionBarTitle(int position) {
@@ -263,8 +265,7 @@ public class MainActivity extends AppCompatActivity implements NotesFragment.OnC
         if (position == 0) {
             // TODO: replace with a more appropriate title
             title = getResources().getString(R.string.app_name);
-        }
-        else {
+        } else {
             title = drawerOptions[position];
         }
         getSupportActionBar().setTitle(title);

@@ -21,7 +21,7 @@ import java.util.Calendar;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class EditNoteActivity extends AppCompatActivity implements SaveNoteDialogFragment.SaveNoteDialogListener {
+public class EditNoteActivity extends AppCompatActivity implements PositiveNegativeListener {
 
     public static final String NOTE_ID_ARG = "noteId";
     private final String NOTE_TITLE = "noteTitle";
@@ -183,7 +183,6 @@ public class EditNoteActivity extends AppCompatActivity implements SaveNoteDialo
 
     public void showSaveNoteDialog() {
         SaveNoteDialogFragment dialog = new SaveNoteDialogFragment();
-        dialog.addOnDialogClickListener(this);
         dialog.show(getFragmentManager(), null);
     }
 
@@ -234,13 +233,13 @@ public class EditNoteActivity extends AppCompatActivity implements SaveNoteDialo
     }
 
     @Override
-    public void onDialogPositiveClick(DialogFragment dialog) {
+    public void onDialogPositiveClick(DialogFragment dialog, Bundle bundle) {
         saveCurrentNote();
         super.onBackPressed();
     }
 
     @Override
-    public void onDialogNegativeClick(DialogFragment dialog) {
+    public void onDialogNegativeClick(DialogFragment dialog, Bundle bundle) {
         // Don't save note
         super.onBackPressed();
     }
