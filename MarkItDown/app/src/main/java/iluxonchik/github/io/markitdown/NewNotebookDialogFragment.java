@@ -47,7 +47,7 @@ public class NewNotebookDialogFragment extends DialogFragment {
                   * 2. Change rectangle's color.
                   * // store color in a var and put in Bundle later
                  */
-                
+
                 Toast.makeText(getActivity(), "ColorPickerDialog", Toast.LENGTH_SHORT).show();
             }
         });

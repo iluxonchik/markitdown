@@ -2,10 +2,13 @@ package iluxonchik.github.io.markitdown;
 
 import android.app.DialogFragment;
 import android.content.BroadcastReceiver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.LocalBroadcastManager;
@@ -14,7 +17,34 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
+import javax.xml.transform.Result;
+
 public class NotebooksFragment extends DatabaseListFragment implements PositiveNegativeListener{
+
+    public static final String EXTRA_NOTEBOOK_NAME = "notebookName";
+    public static final String EXTRA_NOTEBOOK_COLOR = "notebookColor";
+
+    private AsyncTask<Bundle, Void, Void>  createNotebookTask = new AsyncTask<Bundle, Void, Void>() {
+
+        @Override
+        protected Void doInBackground(Bundle... params) {
+            String name = params[0].getString(NotebooksFragment.EXTRA_NOTEBOOK_NAME);
+            int color = params[0].getInt(NotebooksFragment.EXTRA_NOTEBOOK_COLOR);
+
+            SQLiteDatabase writableDb = dbHelper.getWritableDatabase();
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(MarkItDownDbContract.Notebooks.COLUMN_NAME_TITLE, name);
+            contentValues.put(MarkItDownDbContract.Notebooks.COLUMN_NAME_COLOR, color);
+            writableDb.insert(MarkItDownDbContract.Notebooks.TABLE_NAME, null, contentValues);
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void v) {
+            // Swap cursor adapter
+        }
+    };
 
     private FloatingActionButton newNotebookFAB;
 
@@ -89,7 +119,9 @@ public class NotebooksFragment extends DatabaseListFragment implements PositiveN
 
     @Override
     public void onDialogPositiveClick(DialogFragment dialog, Bundle args) {
-
+        // Add notebook to db
+        createNotebookTask.execute(args);
+        
     }
 
     @Override
