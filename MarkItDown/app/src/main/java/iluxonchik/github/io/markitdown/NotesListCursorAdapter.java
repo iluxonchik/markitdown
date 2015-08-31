@@ -33,16 +33,16 @@ public class NotesListCursorAdapter extends CursorAdapter {
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
         // Set title
-        TextView textView = (TextView) view.findViewById(R.id.item_title);
-        textView.setText(cursor.getString(TITLE_POS));
+        TextView noteTitle = (TextView) view.findViewById(R.id.item_title);
+        noteTitle.setText(cursor.getString(TITLE_POS));
 
-        textView = (TextView) view.findViewById(R.id.item_date);
+        noteTitle = (TextView) view.findViewById(R.id.item_date);
 
         // Get date in millis from cursor, convert it to String and set date in list item
         Calendar calendar = Calendar.getInstance();
         SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
         calendar.setTimeInMillis(cursor.getLong(DATE_POS));
-        textView.setText(formatter.format(calendar.getTime()));
+        noteTitle.setText(formatter.format(calendar.getTime()));
 
         // TODO: is this tag even necessary?
         view.setTag(new Integer(cursor.getInt(ID_POS)));

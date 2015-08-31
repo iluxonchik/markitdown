@@ -26,4 +26,8 @@ public abstract class DatabaseListFragment extends ListFragment{
         }
     }
 
+    protected int getSingleSelectedItemId() {
+        long[] checkedItemIds = getListView().getCheckedItemIds();
+        return (int)checkedItemIds[0];
+    }
 }

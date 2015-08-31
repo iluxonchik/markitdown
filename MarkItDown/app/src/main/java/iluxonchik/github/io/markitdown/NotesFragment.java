@@ -238,10 +238,6 @@ public class NotesFragment extends DatabaseListFragment implements ShareAsDialog
         super.onAttach(activity);
     }
 
-    private int getSingleSelectedItemId() {
-        long[] checkedItemIds = getListView().getCheckedItemIds();
-        return (int)checkedItemIds[0];
-    }
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
@@ -280,6 +276,12 @@ public class NotesFragment extends DatabaseListFragment implements ShareAsDialog
                 cursor.getString(CURSOR_CONTENT_POS));
     }
 
+    /**
+     * Get the cursor with the requested note's content.
+     *
+     * @param contentColumnName name of the content's column (HTML or Markdown text)
+     * @return cursor with the requested contents
+     */
     private Cursor getNoteContentsCursor(String contentColumnName) {
         return readableDb.query(MarkItDownDbContract.Notes.TABLE_NAME,
                 new String[]{MarkItDownDbContract.Notes.COLUMN_NAME_TITLE,

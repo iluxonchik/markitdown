@@ -17,12 +17,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
-import javax.xml.transform.Result;
-
 public class NotebooksFragment extends DatabaseListFragment implements PositiveNegativeListener{
 
     public static final String EXTRA_NOTEBOOK_NAME = "notebookName";
     public static final String EXTRA_NOTEBOOK_COLOR = "notebookColor";
+
+    private NotebooksListCursorAdapter cursorAdapter;
 
     private AsyncTask<Bundle, Void, Void>  createNotebookTask = new AsyncTask<Bundle, Void, Void>() {
 
@@ -102,6 +102,9 @@ public class NotebooksFragment extends DatabaseListFragment implements PositiveN
     @Override
     public void onResume() {
         super.onResume();
+        Cursor cursor = createNotebookListCursor();
+        cursorAdapter = new NotebooksListCursorAdapter(getActivity(), cursor, 0);
+        setListAdapter(cursorAdapter);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(broadcastReceiver, new IntentFilter(DeleteService.ACTION_DELETE_NOTEBOOK));
     }
 
@@ -111,11 +114,6 @@ public class NotebooksFragment extends DatabaseListFragment implements PositiveN
         super.onDestroy();
     }
 
-    private Cursor createNotebooksListCursor() {
-        return readableDb.query(MarkItDownDbContract.Notebooks.TABLE_NAME,
-                new String[] {MarkItDownDbContract.Notebooks.COLUMN_NAME_TITLE, MarkItDownDbContract.Notebooks.COLUMN_NAME_COLOR},
-                null, null, null, null, null);
-    }
 
     @Override
     public void onDialogPositiveClick(DialogFragment dialog, Bundle args) {
@@ -127,5 +125,13 @@ public class NotebooksFragment extends DatabaseListFragment implements PositiveN
     @Override
     public void onDialogNegativeClick(DialogFragment dialog, Bundle args) {
 
+    }
+
+    private Cursor createNotebookListCursor() {
+        return readableDb.query(MarkItDownDbContract.Notebooks.TABLE_NAME,
+                new String[] {MarkItDownDbContract.Notebooks._ID,
+                        MarkItDownDbContract.Notebooks.COLUMN_NAME_TITLE,
+                MarkItDownDbContract.Notebooks.COLUMN_NAME_COLOR},
+                null, null, null, null, null);
     }
 }
