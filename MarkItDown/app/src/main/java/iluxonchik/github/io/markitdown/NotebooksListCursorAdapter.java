@@ -37,7 +37,5 @@ public class NotebooksListCursorAdapter extends CursorAdapter {
 
         notebookName.setText(name);
         colorTag.setBackgroundColor(color);
-
-
     }
 }
