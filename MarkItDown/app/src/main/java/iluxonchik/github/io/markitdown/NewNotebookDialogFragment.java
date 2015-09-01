@@ -57,12 +57,14 @@ public class NewNotebookDialogFragment extends DialogFragment {
                 .setPositiveButton(res.getString(android.R.string.ok), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        // TODO
                         listener.onDialogPositiveClick(NewNotebookDialogFragment.this, null);
                     }
                 })
                 .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        // TODO
                         listener.onDialogPositiveClick(NewNotebookDialogFragment.this, null);
                     }
                 }).create();

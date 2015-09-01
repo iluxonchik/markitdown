@@ -2,6 +2,9 @@ package iluxonchik.github.io.markitdown;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,8 +14,8 @@ import android.widget.TextView;
 
 public class NotebooksListCursorAdapter extends CursorAdapter {
 
-    private final int NOTEBOOK_NAME_POS = 0;
-    private final int NOTEBOOK_COLOR_POS = 1;
+    private final int NOTEBOOK_NAME_POS = 1;
+    private final int NOTEBOOK_COLOR_POS = 2;
 
     public NotebooksListCursorAdapter(Context context, Cursor c, int flags) {
         super(context, c, flags);
@@ -34,6 +37,7 @@ public class NotebooksListCursorAdapter extends CursorAdapter {
 
         notebookName.setText(name);
         colorTag.setBackgroundColor(color);
+
 
     }
 }

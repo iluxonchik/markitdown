@@ -12,6 +12,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +32,8 @@ public class NotebooksFragment extends DatabaseListFragment implements PositiveN
             String name = params[0].getString(NotebooksFragment.EXTRA_NOTEBOOK_NAME);
             int color = params[0].getInt(NotebooksFragment.EXTRA_NOTEBOOK_COLOR);
 
+            Log.d("Excep", "doInBackground: " + Integer.toString(color));
+
             SQLiteDatabase writableDb = dbHelper.getWritableDatabase();
             ContentValues contentValues = new ContentValues();
             contentValues.put(MarkItDownDbContract.Notebooks.COLUMN_NAME_TITLE, name);
@@ -43,6 +46,7 @@ public class NotebooksFragment extends DatabaseListFragment implements PositiveN
         @Override
         protected void onPostExecute(Void v) {
             // Swap cursor adapter
+            refreshNotebookListCursor();
         }
     };
 
@@ -89,8 +93,6 @@ public class NotebooksFragment extends DatabaseListFragment implements PositiveN
     @Override
     public void onActivityCreated(Bundle savedInstanceSate) {
         super.onActivityCreated(savedInstanceSate);
-        final ListView listView = getListView();
-
     }
 
     @Override
@@ -133,5 +135,11 @@ public class NotebooksFragment extends DatabaseListFragment implements PositiveN
                         MarkItDownDbContract.Notebooks.COLUMN_NAME_TITLE,
                 MarkItDownDbContract.Notebooks.COLUMN_NAME_COLOR},
                 null, null, null, null, null);
+    }
+
+    private void refreshNotebookListCursor() {
+        if (cursorAdapter != null) {
+            cursorAdapter.swapCursor(createNotebookListCursor());
+        }
     }
 }
