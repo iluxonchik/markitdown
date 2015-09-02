@@ -16,9 +16,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
 
-public class NotebooksFragment extends DatabaseListFragment implements PositiveNegativeListener{
+import iluxonchik.github.io.markitdown.dialog.NewNotebookDialogFragment;
+import iluxonchik.github.io.markitdown.dialog.PositiveNegativeListener;
+
+public class NotebooksFragment extends DatabaseListFragment implements PositiveNegativeListener {
 
     public static final String EXTRA_NOTEBOOK_NAME = "notebookName";
     public static final String EXTRA_NOTEBOOK_COLOR = "notebookColor";
@@ -59,7 +61,7 @@ public class NotebooksFragment extends DatabaseListFragment implements PositiveN
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            // TODO: swap cursor
+            refreshNotebookListCursor();
         }
     };
 
@@ -74,7 +76,6 @@ public class NotebooksFragment extends DatabaseListFragment implements PositiveN
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_items_list, container, false);
-
         newNotebookFAB = (FloatingActionButton)v.findViewById(R.id.addItemFAB);
         newNotebookFAB.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -104,10 +105,11 @@ public class NotebooksFragment extends DatabaseListFragment implements PositiveN
     @Override
     public void onResume() {
         super.onResume();
-        Cursor cursor = createNotebookListCursor();
+        Cursor cursor = MarkitDownDbCursor.Notebooks.createNotebookListCursor(readableDb);
         cursorAdapter = new NotebooksListCursorAdapter(getActivity(), cursor, 0);
         setListAdapter(cursorAdapter);
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(broadcastReceiver, new IntentFilter(DeleteService.ACTION_DELETE_NOTEBOOK));
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(broadcastReceiver,
+                new IntentFilter(DeleteService.ACTION_DELETE_NOTEBOOK));
     }
 
     @Override
@@ -129,17 +131,11 @@ public class NotebooksFragment extends DatabaseListFragment implements PositiveN
 
     }
 
-    private Cursor createNotebookListCursor() {
-        return readableDb.query(MarkItDownDbContract.Notebooks.TABLE_NAME,
-                new String[] {MarkItDownDbContract.Notebooks._ID,
-                        MarkItDownDbContract.Notebooks.COLUMN_NAME_TITLE,
-                MarkItDownDbContract.Notebooks.COLUMN_NAME_COLOR},
-                null, null, null, null, null);
-    }
 
     private void refreshNotebookListCursor() {
         if (cursorAdapter != null) {
-            cursorAdapter.swapCursor(createNotebookListCursor());
+            cursorAdapter.swapCursor(MarkitDownDbCursor.Notebooks
+                    .createNotebookListCursor(readableDb));
         }
     }
 }

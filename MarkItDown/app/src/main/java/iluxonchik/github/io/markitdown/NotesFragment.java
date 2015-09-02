@@ -23,6 +23,9 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.ListView;
 
+import iluxonchik.github.io.markitdown.dialog.NotebooksListDialogFragment;
+import iluxonchik.github.io.markitdown.dialog.ShareAsDialogFragment;
+
 public class NotesFragment extends DatabaseListFragment implements ShareAsDialogFragment.OnShareAsOptionSelectedListener{
 
     public interface OnCABStatusChangedListener {
@@ -151,6 +154,17 @@ public class NotesFragment extends DatabaseListFragment implements ShareAsDialog
                     case (R.id.share_note):
                         ShareAsDialogFragment shareAsDialogFragment = new ShareAsDialogFragment();
                         shareAsDialogFragment.show(getFragmentManager(), null);
+                        break;
+                    case (R.id.add_to_notebook):
+                        NotebooksListDialogFragment dialog = new NotebooksListDialogFragment();
+                        dialog.setOnNotebookSelectedListener(
+                                new NotebooksListDialogFragment.OnNotebookSelectedListener() {
+                            @Override
+                            public void onNotebookSelected(long id) {
+                                // TODO: add selected notes to selected notebook
+                            }
+                        });
+                        dialog.show(getFragmentManager(), null);
                         break;
                     case (R.id.edit_note):
                         intent = new Intent(getActivity(), EditNoteActivity.class);

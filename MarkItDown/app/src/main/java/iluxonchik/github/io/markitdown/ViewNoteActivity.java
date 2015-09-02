@@ -19,6 +19,8 @@ import android.view.MenuItem;
 import android.webkit.WebView;
 import android.widget.TextView;
 
+import iluxonchik.github.io.markitdown.dialog.ShareAsDialogFragment;
+
 public class ViewNoteActivity extends AppCompatActivity implements ShareAsDialogFragment.OnShareAsOptionSelectedListener {
 
     private final String VIEW_NOTE_ACTIVITY_LOGTAG = "ViewNoteActivity";
