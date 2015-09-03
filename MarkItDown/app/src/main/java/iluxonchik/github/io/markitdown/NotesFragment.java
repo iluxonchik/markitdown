@@ -1,7 +1,12 @@
 package iluxonchik.github.io.markitdown;
 
 import android.app.Activity;
+import android.content.ContentValues;
+import android.content.res.Resources;
+import android.database.sqlite.SQLiteDatabase;
+import android.os.AsyncTask;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.app.DialogFragment;
 import android.content.BroadcastReceiver;
@@ -22,6 +27,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.ListView;
+import android.widget.Toast;
+
+import org.apache.commons.lang3.ArrayUtils;
+
+import java.util.List;
 
 import iluxonchik.github.io.markitdown.dialog.NotebooksListDialogFragment;
 import iluxonchik.github.io.markitdown.dialog.ShareAsDialogFragment;
@@ -31,6 +41,53 @@ public class NotesFragment extends DatabaseListFragment implements ShareAsDialog
     public interface OnCABStatusChangedListener {
         void onCABCreate();
         void onCABDestroy();
+    }
+
+    private class AddNotesToNotebookTask extends AsyncTask<Long[], Void, Boolean > {
+
+        @Override
+        protected Boolean doInBackground(Long[]... params) {
+            Long[] noteIds = params[0];
+            long notebookId = params[1][0];
+
+            Log.d("Task", "noteId[0]=" + Long.toString(noteIds[0]));
+            Log.d("Task", "notebookId=" + Long.toString(notebookId));
+
+            SQLiteDatabase writableDb = dbHelper.getWritableDatabase();
+            for (long noteId : noteIds) {
+                addNoteToNotebook(writableDb, noteId, notebookId);
+            }
+
+            return noteIds.length > 1;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean isMultipleNotesAdded) {
+            int snackbartMessageResId = (isMultipleNotesAdded) ? R.string.snackbar_notes_added
+                    : R.string.snackbar_note_added;
+
+           final Snackbar snackbar = Snackbar
+                    .make(getListView(), snackbartMessageResId, Snackbar.LENGTH_SHORT);
+            snackbar.setAction(R.string.snackbar_action, new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    snackbar.dismiss();
+                }
+            });
+            snackbar.show();
+        }
+
+        private ContentValues getContentValues(long noteBookId) {
+            ContentValues values = new ContentValues();
+            values.put(MarkItDownDbContract.Notes.COLUMN_NAME_NOTEBOOK, (int)noteBookId);
+            return values;
+        }
+
+        private void addNoteToNotebook(SQLiteDatabase writableDb, long noteId, long notebookId) {
+            writableDb.update(MarkItDownDbContract.Notes.TABLE_NAME,
+                    getContentValues(notebookId), "_id=?",
+                    new String[]{Long.toString(noteId)});
+        }
     }
 
     private NotesListCursorAdapter cursorAdapter;
@@ -160,8 +217,11 @@ public class NotesFragment extends DatabaseListFragment implements ShareAsDialog
                         dialog.setOnNotebookSelectedListener(
                                 new NotebooksListDialogFragment.OnNotebookSelectedListener() {
                             @Override
-                            public void onNotebookSelected(long id) {
-                                // TODO: add selected notes to selected notebook
+                            public void onNotebookSelected(DialogFragment dialog,  long id) {
+                                dialog.dismiss();
+                                long[] notes = getListView().getCheckedItemIds();
+                                new AddNotesToNotebookTask().execute(ArrayUtils.toObject(notes),
+                                        new Long[] {id});
                             }
                         });
                         dialog.show(getFragmentManager(), null);

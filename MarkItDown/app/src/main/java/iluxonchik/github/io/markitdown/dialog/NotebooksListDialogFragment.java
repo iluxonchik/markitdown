@@ -12,6 +12,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.text.Layout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -33,7 +34,7 @@ public class NotebooksListDialogFragment extends DialogFragment {
      * Interface must be implemented by the listener that wants to know the clicked dialog.
      */
     public interface OnNotebookSelectedListener {
-        void onNotebookSelected(long id);
+        void onNotebookSelected(DialogFragment dialog, long id);
     }
 
     private OnNotebookSelectedListener listener;
@@ -61,8 +62,9 @@ public class NotebooksListDialogFragment extends DialogFragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if (listener != null) {
-                    listener.onNotebookSelected(id);
+                    listener.onNotebookSelected(NotebooksListDialogFragment.this, id);
                 }
+                Log.d("Task", "click");
             }
         });
         builder.setNegativeButton(res.getString(android.R.string.cancel),
@@ -88,9 +90,9 @@ public class NotebooksListDialogFragment extends DialogFragment {
                 throw new ClassCastException("Starting activity or fragment must implement " +
                         OnNotebookSelectedListener.class.getCanonicalName());
             }
+            setOnNotebookSelectedListener((OnNotebookSelectedListener) frag);
         }
 
-        setOnNotebookSelectedListener((OnNotebookSelectedListener) frag);
 
     }
 
