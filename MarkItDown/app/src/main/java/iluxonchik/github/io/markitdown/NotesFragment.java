@@ -36,7 +36,15 @@ import java.util.List;
 import iluxonchik.github.io.markitdown.dialog.NotebooksListDialogFragment;
 import iluxonchik.github.io.markitdown.dialog.ShareAsDialogFragment;
 
-public class NotesFragment extends DatabaseListFragment implements ShareAsDialogFragment.OnShareAsOptionSelectedListener{
+public class NotesFragment extends DatabaseListFragment
+        implements ShareAsDialogFragment.OnShareAsOptionSelectedListener{
+
+    // Custom selection string and args for SQL queries 
+    private String customSelection = null;
+    private String[] customSelectionArgs = null;
+
+    public static final String EXTRA_CUSTOM_SELECTION = "customSelection";
+    public static final String EXTRA_CUSTOM_SELECTION_ARGS = "customSelectionArgs";
 
     public interface OnCABStatusChangedListener {
         void onCABCreate();
@@ -116,6 +124,17 @@ public class NotesFragment extends DatabaseListFragment implements ShareAsDialog
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (savedInstanceState != null) {
+            customSelection = savedInstanceState.getString(EXTRA_CUSTOM_SELECTION, null);
+            customSelectionArgs = savedInstanceState.getStringArray(EXTRA_CUSTOM_SELECTION_ARGS);
+
+        } else {
+            Bundle args = getArguments();
+            customSelection = args.getString(EXTRA_CUSTOM_SELECTION, null);
+            customSelectionArgs = args.getStringArray(EXTRA_CUSTOM_SELECTION_ARGS);
+        }
+
         openDatabase();
     }
 
@@ -248,7 +267,6 @@ public class NotesFragment extends DatabaseListFragment implements ShareAsDialog
 
         });
 
-
     }
 
     @Override
@@ -367,7 +385,7 @@ public class NotesFragment extends DatabaseListFragment implements ShareAsDialog
         return  readableDb.query(MarkItDownDbContract.Notes.TABLE_NAME,
                 new String[]{MarkItDownDbContract.Notes._ID, MarkItDownDbContract.Notes.COLUMN_NAME_TITLE,
                         MarkItDownDbContract.Notes.COLUMN_NAME_DATE_SAVED},
-                null, null, null, null, null);
+                customSelection, customSelectionArgs, null, null, null);
 
     }
 
