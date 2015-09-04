@@ -16,6 +16,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 
 import iluxonchik.github.io.markitdown.dialog.NewNotebookDialogFragment;
 import iluxonchik.github.io.markitdown.dialog.PositiveNegativeListener;
@@ -80,20 +81,27 @@ public class NotebooksFragment extends DatabaseListFragment implements PositiveN
         newNotebookFAB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO: show create notebook dialog
                 DialogFragment newNotebookDialog = new NewNotebookDialogFragment();
                 newNotebookDialog.setTargetFragment(NotebooksFragment.this, 0);
                 newNotebookDialog.show(getFragmentManager(), null);
-
             }
         });
-
         return v;
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceSate) {
         super.onActivityCreated(savedInstanceSate);
+
+        getListView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // TODO: put notes fragment with different cursor
+                /*
+                This will require refractoring NotesFragment to support custom cursorAdapters
+                 */
+            }
+        });
     }
 
     @Override
