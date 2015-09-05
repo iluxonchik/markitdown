@@ -1,7 +1,9 @@
-package iluxonchik.github.io.markitdown;
+package iluxonchik.github.io.markitdown.database;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+
+import iluxonchik.github.io.markitdown.database.MarkItDownDbContract;
 
 // TODO: move the rest of the cursors here
 

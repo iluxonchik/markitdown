@@ -1,10 +1,10 @@
-package iluxonchik.github.io.markitdown;
-
-import android.view.View;
+package iluxonchik.github.io.markitdown.helpers;
 
 import com.github.rjeschke.txtmark.*;
 
-public class TxtmarkProcessor extends MarkdownProcessor{
+import iluxonchik.github.io.markitdown.helpers.MarkdownProcessor;
+
+public class TxtmarkProcessor extends MarkdownProcessor {
 
     public TxtmarkProcessor() {
 

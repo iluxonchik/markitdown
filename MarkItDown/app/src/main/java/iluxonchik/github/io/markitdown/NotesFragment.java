@@ -2,7 +2,6 @@ package iluxonchik.github.io.markitdown;
 
 import android.app.Activity;
 import android.content.ContentValues;
-import android.content.res.Resources;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.support.design.widget.FloatingActionButton;
@@ -27,24 +26,24 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-import java.util.List;
-
+import iluxonchik.github.io.markitdown.database.MarkItDownDbContract;
 import iluxonchik.github.io.markitdown.dialog.NotebooksListDialogFragment;
 import iluxonchik.github.io.markitdown.dialog.ShareAsDialogFragment;
+import iluxonchik.github.io.markitdown.services.DeleteService;
 
 public class NotesFragment extends DatabaseListFragment
         implements ShareAsDialogFragment.OnShareAsOptionSelectedListener{
 
-    // Custom selection string and args for SQL queries 
+    // Custom selection string and args for SQL queries
     private String customSelection = null;
     private String[] customSelectionArgs = null;
 
     public static final String EXTRA_CUSTOM_SELECTION = "customSelection";
     public static final String EXTRA_CUSTOM_SELECTION_ARGS = "customSelectionArgs";
+    private FragmentCommunicationContract.OnMessageSendingNeeded listenerActivity;
 
     public interface OnCABStatusChangedListener {
         void onCABCreate();
@@ -57,10 +56,6 @@ public class NotesFragment extends DatabaseListFragment
         protected Boolean doInBackground(Long[]... params) {
             Long[] noteIds = params[0];
             long notebookId = params[1][0];
-
-            Log.d("Task", "noteId[0]=" + Long.toString(noteIds[0]));
-            Log.d("Task", "notebookId=" + Long.toString(notebookId));
-
             SQLiteDatabase writableDb = dbHelper.getWritableDatabase();
             for (long noteId : noteIds) {
                 addNoteToNotebook(writableDb, noteId, notebookId);
@@ -125,16 +120,12 @@ public class NotesFragment extends DatabaseListFragment
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (savedInstanceState != null) {
-            customSelection = savedInstanceState.getString(EXTRA_CUSTOM_SELECTION, null);
-            customSelectionArgs = savedInstanceState.getStringArray(EXTRA_CUSTOM_SELECTION_ARGS);
+        Bundle args = getArguments();
 
-        } else {
-            Bundle args = getArguments();
+        if (args != null) {
             customSelection = args.getString(EXTRA_CUSTOM_SELECTION, null);
             customSelectionArgs = args.getStringArray(EXTRA_CUSTOM_SELECTION_ARGS);
         }
-
         openDatabase();
     }
 
@@ -171,19 +162,15 @@ public class NotesFragment extends DatabaseListFragment
 
             @Override
             public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
-                Log.d("CAT", "onCheckedStateChanged. Number of checked items: " + listView.getCheckedItemCount());
-
                 // TODO: REFRACTOR nested if's
                 if (multipleItemsChecked) {
                     if (listView.getCheckedItemCount() == 1) {
-                        Log.d("CAT", "Checked one item");
                         // Passing from multiple checked items to one
                         multipleItemsChecked = false;
                         invertMenuOptions(mode.getMenu());
                     }
                 } else {
                     if (listView.getCheckedItemCount() > 1) {
-                        Log.d("CAT", "Checked more than one item");
                         multipleItemsChecked = true;
                         invertMenuOptions(mode.getMenu());
                     }
@@ -194,7 +181,6 @@ public class NotesFragment extends DatabaseListFragment
             public boolean onCreateActionMode(ActionMode mode, Menu menu) {
                 // Inflate menu
                 // TODO: tell activity to disable drawer layout
-                Log.d("CAT", "onCreateActionMode");
                 MenuInflater menuInflater = mode.getMenuInflater();
                 menuInflater.inflate(R.menu.menu_notes_context, menu);
                 newNoteFAB.hide();
@@ -235,14 +221,14 @@ public class NotesFragment extends DatabaseListFragment
                         NotebooksListDialogFragment dialog = new NotebooksListDialogFragment();
                         dialog.setOnNotebookSelectedListener(
                                 new NotebooksListDialogFragment.OnNotebookSelectedListener() {
-                            @Override
-                            public void onNotebookSelected(DialogFragment dialog,  long id) {
-                                dialog.dismiss();
-                                long[] notes = getListView().getCheckedItemIds();
-                                new AddNotesToNotebookTask().execute(ArrayUtils.toObject(notes),
-                                        new Long[] {id});
-                            }
-                        });
+                                    @Override
+                                    public void onNotebookSelected(DialogFragment dialog, long id) {
+                                        dialog.dismiss();
+                                        long[] notes = getListView().getCheckedItemIds();
+                                        new AddNotesToNotebookTask().execute(ArrayUtils.toObject(notes),
+                                                new Long[]{id});
+                                    }
+                                });
                         dialog.show(getFragmentManager(), null);
                         break;
                     case (R.id.edit_note):
@@ -268,6 +254,7 @@ public class NotesFragment extends DatabaseListFragment
         });
 
     }
+
 
     @Override
     public void onDestroy() {
@@ -299,9 +286,10 @@ public class NotesFragment extends DatabaseListFragment
         long[] checkedItemIds = getListView().getCheckedItemIds();
         for (long id : checkedItemIds)
         {
-            DeleteService.startActionDeleteNote(getActivity(), (int)id);
+            DeleteService.startActionDeleteNote(getActivity(), (int) id);
         }
     }
+
 
     @Override
     public void onResume() {
@@ -310,6 +298,19 @@ public class NotesFragment extends DatabaseListFragment
         cursorAdapter = new NotesListCursorAdapter(getActivity(), cursor, 0);
         setListAdapter(cursorAdapter);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(broadcastReceiver, new IntentFilter(DeleteService.ACTION_DELETE_NOTE));
+
+        Bundle args = getArguments();
+
+        if(args != null) {
+            String title = args.getString(FragmentCommunicationContract.
+                    SetTitleBarTitle.ARG_FRAGMENT_TITLE, null);
+
+            if (title != null) {
+                // If actionbar title extra is not null, ask MainActivity to change it
+                listenerActivity.onMessageSent(FragmentCommunicationContract.
+                        Message.MESSAGE_CHANGE_ACTION_BAR_TITLE, args);
+            }
+        }
     }
 
     @Override
@@ -324,9 +325,21 @@ public class NotesFragment extends DatabaseListFragment
             onCABStatusChangedListener = (OnCABStatusChangedListener)activity;
 
         } catch (ClassCastException e) {
-            throw new ClassCastException("Activity that uses "+ this.getClass().getCanonicalName() + " must implement " +
+            throw new ClassCastException("Activity that uses "+
+                    this.getClass().getCanonicalName() + " must implement " +
                     OnCABStatusChangedListener.class.getCanonicalName());
         }
+
+        try {
+            this.listenerActivity =
+                    (FragmentCommunicationContract.OnMessageSendingNeeded)activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException("Activity that uses "+
+                    this.getClass().getCanonicalName() + " must implement " +
+                    FragmentCommunicationContract.
+                            OnMessageSendingNeeded.class.getCanonicalName());
+        }
+
         super.onAttach(activity);
     }
 
@@ -389,7 +402,7 @@ public class NotesFragment extends DatabaseListFragment
 
     }
 
-    public void setAlertDialogText(AlertDialog.Builder builder) {
+    private void setAlertDialogText(AlertDialog.Builder builder) {
         int titleResId;
         int messageResId;
         int numSelectedNotes = getListView().getCheckedItemCount();
@@ -405,6 +418,7 @@ public class NotesFragment extends DatabaseListFragment
         }
 
         builder.setTitle(getResources().getString(titleResId));
-        builder.setMessage(getResources().getString(messageResId) + " " + getResources().getString(R.string.dialog_action_cannot_be_undone));
+        builder.setMessage(getResources().getString(messageResId) + " " +
+                getResources().getString(R.string.dialog_action_cannot_be_undone));
     }
 }

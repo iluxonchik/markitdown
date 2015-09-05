@@ -26,11 +26,11 @@
         </activity>
 
         <service
-            android:name=".MarkdownToHTMLService"
+            android:name=".services.MarkdownToHTMLService"
             android:exported="false" >
         </service>
         <service
-            android:name=".DeleteService"
+            android:name=".services.DeleteService"
             android:exported="false" >
         </service>
     </application>

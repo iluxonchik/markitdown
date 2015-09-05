@@ -1,5 +1,6 @@
 package iluxonchik.github.io.markitdown;
 
+import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
@@ -17,9 +18,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.TextView;
 
+import iluxonchik.github.io.markitdown.database.MarkItDownDbContract;
+import iluxonchik.github.io.markitdown.database.MarkitDownDbCursor;
 import iluxonchik.github.io.markitdown.dialog.NewNotebookDialogFragment;
 import iluxonchik.github.io.markitdown.dialog.PositiveNegativeListener;
+import iluxonchik.github.io.markitdown.services.DeleteService;
 
 public class NotebooksFragment extends DatabaseListFragment implements PositiveNegativeListener {
 
@@ -27,6 +32,7 @@ public class NotebooksFragment extends DatabaseListFragment implements PositiveN
     public static final String EXTRA_NOTEBOOK_COLOR = "notebookColor";
 
     private NotebooksListCursorAdapter cursorAdapter;
+    private FragmentCommunicationContract.OnMessageSendingNeeded listenerActivity;
 
     private AsyncTask<Bundle, Void, Void>  createNotebookTask = new AsyncTask<Bundle, Void, Void>() {
 
@@ -67,6 +73,22 @@ public class NotebooksFragment extends DatabaseListFragment implements PositiveN
     };
 
     @Override
+    public void onAttach(Activity context) {
+        super.onAttach(context);
+        Log.d("Excep", "onAttach");
+
+        try {
+            this.listenerActivity =
+                    (FragmentCommunicationContract.OnMessageSendingNeeded)context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException("Activity that uses "+
+                    this.getClass().getCanonicalName() + " must implement " +
+                    FragmentCommunicationContract.
+                            OnMessageSendingNeeded.class.getCanonicalName());
+        }
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         openDatabase();
@@ -96,10 +118,22 @@ public class NotebooksFragment extends DatabaseListFragment implements PositiveN
         getListView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // TODO: put notes fragment with different cursor
-                /*
-                This will require refractoring NotesFragment to support custom cursorAdapters
-                 */
+                Bundle bundle = new Bundle();
+                TextView notebookTitle = (TextView) view.findViewById(R.id.notebook_title);
+                        bundle.putString(FragmentCommunicationContract.
+                                SetTitleBarTitle.ARG_FRAGMENT_TITLE, notebookTitle.getText()
+                                .toString());
+                bundle.putString(FragmentCommunicationContract.
+                        StartNotesFromNotebooks.ARG_CUSTOM_SELECTION,
+                        MarkItDownDbContract.Notes.COLUMN_NAME_NOTEBOOK + "=?");
+                bundle.putStringArray(FragmentCommunicationContract.
+                        StartNotesFromNotebooks.ARG_CUSTOM_SELECTION_ARGS,
+                        new String[]{Long.toString(id)});
+
+                listenerActivity.onMessageSent(
+                        FragmentCommunicationContract.Message.MESSAGE_START_NOTES_FROM_NOTEBOOKS,
+                        bundle
+                        );
             }
         });
     }

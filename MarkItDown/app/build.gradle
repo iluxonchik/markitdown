@@ -7,7 +7,7 @@ android {
     defaultConfig {
         applicationId "iluxonchik.github.io.markitdown"
         minSdkVersion 15
-        targetSdkVersion 22
+        targetSdkVersion 23
         versionCode 1
         versionName "1.0"
     }
@@ -22,9 +22,9 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile files('libs/txtmark-0.13.jar')
-    compile 'com.android.support:support-v4:23.0.0'
-    compile 'com.android.support:appcompat-v7:23.0.0'
-    compile 'com.android.support:design:23.0.0'
+    compile 'com.android.support:support-v4:23.0.1'
+    compile 'com.android.support:appcompat-v7:23.0.1'
+    compile 'com.android.support:design:23.0.1'
     compile 'de.hdodenhof:circleimageview:1.3.0'
     compile 'org.apache.commons:commons-lang3:3.0'
 }

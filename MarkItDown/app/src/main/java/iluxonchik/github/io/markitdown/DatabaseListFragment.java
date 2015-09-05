@@ -3,6 +3,8 @@ package iluxonchik.github.io.markitdown;
 import android.app.ListFragment;
 import android.database.sqlite.SQLiteDatabase;
 
+import iluxonchik.github.io.markitdown.database.MarkItDownDbHelper;
+
 /**
  * A ListFragment that uses a database to fill the ListView.
  */

@@ -1,4 +1,4 @@
-package iluxonchik.github.io.markitdown;
+package iluxonchik.github.io.markitdown.helpers;
 
 import android.view.View;
 import android.widget.TextView;

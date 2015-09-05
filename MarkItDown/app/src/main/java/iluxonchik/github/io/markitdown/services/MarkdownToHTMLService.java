@@ -1,14 +1,17 @@
-package iluxonchik.github.io.markitdown;
+package iluxonchik.github.io.markitdown.services;
 
 import android.app.IntentService;
 import android.content.ContentValues;
 import android.content.Intent;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import android.webkit.WebView;
+
+import iluxonchik.github.io.markitdown.database.MarkItDownDbContract;
+import iluxonchik.github.io.markitdown.database.MarkItDownDbHelper;
+import iluxonchik.github.io.markitdown.helpers.TxtmarkProcessor;
+import iluxonchik.github.io.markitdown.helpers.MarkdownProcessor;
 
 public class MarkdownToHTMLService extends IntentService {
 

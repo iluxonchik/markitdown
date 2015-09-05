@@ -1,4 +1,4 @@
-package iluxonchik.github.io.markitdown;
+package iluxonchik.github.io.markitdown.database;
 
 
 import android.provider.BaseColumns;

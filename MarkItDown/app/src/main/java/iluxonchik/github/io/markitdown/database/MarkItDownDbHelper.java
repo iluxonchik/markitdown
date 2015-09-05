@@ -1,8 +1,10 @@
-package iluxonchik.github.io.markitdown;
+package iluxonchik.github.io.markitdown.database;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+
+import iluxonchik.github.io.markitdown.database.MarkItDownDbContract;
 
 public class MarkItDownDbHelper extends SQLiteOpenHelper {
 

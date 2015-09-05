@@ -19,7 +19,10 @@ import android.view.MenuItem;
 import android.webkit.WebView;
 import android.widget.TextView;
 
+import iluxonchik.github.io.markitdown.database.MarkItDownDbContract;
+import iluxonchik.github.io.markitdown.database.MarkItDownDbHelper;
 import iluxonchik.github.io.markitdown.dialog.ShareAsDialogFragment;
+import iluxonchik.github.io.markitdown.services.MarkdownToHTMLService;
 
 public class ViewNoteActivity extends AppCompatActivity implements ShareAsDialogFragment.OnShareAsOptionSelectedListener {
 

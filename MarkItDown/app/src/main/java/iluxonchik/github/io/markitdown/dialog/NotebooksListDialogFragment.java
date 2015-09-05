@@ -7,23 +7,18 @@ import android.app.Fragment;
 import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
-import android.text.Layout;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.Toast;
 
-import iluxonchik.github.io.markitdown.MarkItDownDbHelper;
-import iluxonchik.github.io.markitdown.MarkitDownDbCursor;
+import iluxonchik.github.io.markitdown.database.MarkItDownDbHelper;
+import iluxonchik.github.io.markitdown.database.MarkitDownDbCursor;
 import iluxonchik.github.io.markitdown.NotebooksListCursorAdapter;
-import iluxonchik.github.io.markitdown.R;
 
 /**
  * Dialog fragment which is shown when the user tries to add a note to a notebook.

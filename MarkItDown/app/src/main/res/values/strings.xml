@@ -13,7 +13,7 @@
 
     <string-array name="drawer_options">
         <item>Home</item>
-        <item>Notes</item>
+        <item>All Notes</item>
         <item>Notebooks</item>
         <item>Tags</item>
         <item>Settings</item>

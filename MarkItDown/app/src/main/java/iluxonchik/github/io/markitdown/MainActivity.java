@@ -11,6 +11,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,7 +24,8 @@ import iluxonchik.github.io.markitdown.dialog.ShareAsDialogFragment;
 
 
 public class MainActivity extends AppCompatActivity
-        implements NotesFragment.OnCABStatusChangedListener {
+        implements NotesFragment.OnCABStatusChangedListener,
+        FragmentCommunicationContract.OnMessageSendingNeeded {
 
     private final String TOP_FRAGMENT_TAG = "TopFragment";
     private final String CURR_POSITION = "currentPosition";
@@ -34,6 +36,8 @@ public class MainActivity extends AppCompatActivity
     private LinearLayout navigationDrawer;
     private ActionBarDrawerToggle drawerToggle;
     private int currentPosition = 0;
+    private boolean skipTitleChangeOnBackstackChage = false;
+    private boolean skipNavDrawerPositionUpdate = false;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -97,6 +101,11 @@ public class MainActivity extends AppCompatActivity
         getFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
             @Override
             public void onBackStackChanged() {
+                /*
+                     This call comes all the way at the end of the sequence – after the new
+                     fragment’s onResume call is made when the fragment is being added, and after
+                     the fragment’s onDetach call is made when the fragment is being removed.
+                 */
                 FragmentManager fragmentManager = getFragmentManager();
                 Fragment activeFragment = fragmentManager.findFragmentByTag(TOP_FRAGMENT_TAG);
 
@@ -129,8 +138,17 @@ public class MainActivity extends AppCompatActivity
                     finish();
                 }
 
-                updateActionBarTitle(currentPosition);
-                drawerList.setItemChecked(currentPosition, true);
+                if(skipTitleChangeOnBackstackChage) {
+                    skipTitleChangeOnBackstackChage = false;
+                } else {
+                    updateActionBarTitle(currentPosition);
+                }
+
+                if (skipNavDrawerPositionUpdate) {
+                    skipNavDrawerPositionUpdate = false;
+                } else {
+                    drawerList.setItemChecked(currentPosition, true);
+                }
             }
         });
     }
@@ -282,5 +300,21 @@ public class MainActivity extends AppCompatActivity
     public void onCABDestroy() {
         // Enable drawer layout
         drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+    }
+
+    @Override
+    public void onMessageSent(int msgCode, Bundle args) {
+        if (msgCode == FragmentCommunicationContract.Message.MESSAGE_START_NOTES_FROM_NOTEBOOKS) {
+            Fragment frag = new NotesFragment();
+            frag.setArguments(args);
+            replaceFragment(R.id.content_frame, frag, TOP_FRAGMENT_TAG);
+        } else if (msgCode == FragmentCommunicationContract.Message.
+                MESSAGE_CHANGE_ACTION_BAR_TITLE) {
+            String title = args.getString(FragmentCommunicationContract.
+                    SetTitleBarTitle.ARG_FRAGMENT_TITLE);
+            getSupportActionBar().setTitle(title);
+            skipTitleChangeOnBackstackChage = true;
+            skipNavDrawerPositionUpdate = true;
+        }
     }
 }

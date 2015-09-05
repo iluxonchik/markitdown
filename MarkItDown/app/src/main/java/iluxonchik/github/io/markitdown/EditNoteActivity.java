@@ -17,6 +17,8 @@ import android.widget.EditText;
 import android.widget.Toast;
 import java.util.Calendar;
 
+import iluxonchik.github.io.markitdown.database.MarkItDownDbContract;
+import iluxonchik.github.io.markitdown.database.MarkItDownDbHelper;
 import iluxonchik.github.io.markitdown.dialog.PositiveNegativeListener;
 import iluxonchik.github.io.markitdown.dialog.SaveNoteDialogFragment;
 

@@ -1,4 +1,4 @@
-package iluxonchik.github.io.markitdown;
+package iluxonchik.github.io.markitdown.services;
 
 import android.app.IntentService;
 import android.content.Intent;
@@ -6,6 +6,9 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+
+import iluxonchik.github.io.markitdown.database.MarkItDownDbContract;
+import iluxonchik.github.io.markitdown.database.MarkItDownDbHelper;
 
 /**
  * This IntentService handles the deletion actions.
