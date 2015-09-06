@@ -10,12 +10,17 @@ import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import iluxonchik.github.io.markitdown.NotebooksFragment;
 import iluxonchik.github.io.markitdown.R;
+import io.github.iluxonchik.colorpicker.ColorPickerDialog;
 
 /**
  * New notebook dialog
@@ -23,6 +28,7 @@ import iluxonchik.github.io.markitdown.R;
 public class NewNotebookDialogFragment extends DialogFragment {
     private PositiveNegativeListener listener;
     private int selectedColor = Color.TRANSPARENT;
+    private String notebookTitle = null;
 
     public NewNotebookDialogFragment() {
 
@@ -30,21 +36,30 @@ public class NewNotebookDialogFragment extends DialogFragment {
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-
         Resources res = getResources();
         final LayoutInflater factory = LayoutInflater.from(getActivity());
         final View dialogView = factory.inflate(R.layout.dialog_create_notebook, null);
-        ImageView colorImageView = (ImageView) dialogView.findViewById(R.id.notebookColor);
-        setImageViewColor(colorImageView, Color.BLACK);
+        final ImageView colorImageView = (ImageView) dialogView.findViewById(R.id.notebook_color);
+        final EditText notebookNameEditText = (EditText) dialogView.findViewById(R.id.note_title);
+        setImageViewColor(colorImageView, selectedColor);
         colorImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                /*
-                  * 1. Show color picker, read color
-                  * 2. Change rectangle's color.
-                  * // store color in a var and put in Bundle later
-                 */
+                ColorPickerDialog.Builder builder = new ColorPickerDialog.Builder();
+                builder.maxSelectedColors(1)
+                        .setOnOkCancelPressListener(new ColorPickerDialog.OnOkCancelPressListener() {
+                            @Override
+                            public void onColorPickerDialogOkPressed(int[] selectedColors) {
+                                selectedColor = selectedColors[0];
+                                setImageViewColor(colorImageView, selectedColor);
+                            }
 
+                            @Override
+                            public void onColorPickerDialogCancelPressed(int[] selectedColors) {
+
+                            }
+                        });
+                builder.build().show(getFragmentManager(), null);
                 Toast.makeText(getActivity(), "ColorPickerDialog", Toast.LENGTH_SHORT).show();
             }
         });
@@ -54,15 +69,17 @@ public class NewNotebookDialogFragment extends DialogFragment {
                 .setPositiveButton(res.getString(android.R.string.ok), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        // TODO
-                        listener.onDialogPositiveClick(NewNotebookDialogFragment.this, null);
+                        notebookTitle = notebookNameEditText.getText().toString();
+                        listener.onDialogPositiveClick(NewNotebookDialogFragment.this,
+                                createNewNotebookBundle());
                     }
                 })
                 .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        // TODO
-                        listener.onDialogPositiveClick(NewNotebookDialogFragment.this, null);
+                        notebookTitle = notebookNameEditText.getText().toString();
+                        listener.onDialogPositiveClick(NewNotebookDialogFragment.this,
+                                createNewNotebookBundle());
                     }
                 }).create();
 
@@ -91,5 +108,12 @@ public class NewNotebookDialogFragment extends DialogFragment {
 
     private void setOnDialogClickListener(PositiveNegativeListener listener) {
         this.listener = listener;
+    }
+
+    private Bundle createNewNotebookBundle() {
+        Bundle bundle = new Bundle();
+        bundle.putInt(NotebooksFragment.EXTRA_NOTEBOOK_COLOR, selectedColor);
+        bundle.putString(NotebooksFragment.EXTRA_NOTEBOOK_TITLE, notebookTitle);
+        return bundle;
     }
 }

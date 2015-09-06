@@ -5,6 +5,7 @@
     android:weightSum="1">
 
     <EditText
+        android:id="@+id/note_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/dialog_new_notebook_hint"
@@ -21,7 +22,7 @@
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:layout_gravity="left" />
         <ImageView
-            android:id="@+id/notebookColor"
+            android:id="@+id/notebook_color"
             android:layout_marginLeft="6dp"
             android:layout_width="100dp"
             android:layout_height="20dp"

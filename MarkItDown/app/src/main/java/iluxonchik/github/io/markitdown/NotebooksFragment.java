@@ -28,36 +28,11 @@ import iluxonchik.github.io.markitdown.services.DeleteService;
 
 public class NotebooksFragment extends DatabaseListFragment implements PositiveNegativeListener {
 
-    public static final String EXTRA_NOTEBOOK_NAME = "notebookName";
+    public static final String EXTRA_NOTEBOOK_TITLE = "notebookName";
     public static final String EXTRA_NOTEBOOK_COLOR = "notebookColor";
 
     private NotebooksListCursorAdapter cursorAdapter;
     private FragmentCommunicationContract.OnMessageSendingNeeded listenerActivity;
-
-    private AsyncTask<Bundle, Void, Void>  createNotebookTask = new AsyncTask<Bundle, Void, Void>() {
-
-        @Override
-        protected Void doInBackground(Bundle... params) {
-            String name = params[0].getString(NotebooksFragment.EXTRA_NOTEBOOK_NAME);
-            int color = params[0].getInt(NotebooksFragment.EXTRA_NOTEBOOK_COLOR);
-
-            Log.d("Excep", "doInBackground: " + Integer.toString(color));
-
-            SQLiteDatabase writableDb = dbHelper.getWritableDatabase();
-            ContentValues contentValues = new ContentValues();
-            contentValues.put(MarkItDownDbContract.Notebooks.COLUMN_NAME_TITLE, name);
-            contentValues.put(MarkItDownDbContract.Notebooks.COLUMN_NAME_COLOR, color);
-            writableDb.insert(MarkItDownDbContract.Notebooks.TABLE_NAME, null, contentValues);
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void v) {
-            // Swap cursor adapter
-            refreshNotebookListCursor();
-        }
-    };
 
     private FloatingActionButton newNotebookFAB;
 
@@ -164,7 +139,7 @@ public class NotebooksFragment extends DatabaseListFragment implements PositiveN
     @Override
     public void onDialogPositiveClick(DialogFragment dialog, Bundle args) {
         // Add notebook to db
-        createNotebookTask.execute(args);
+        newCreateNotebookTask().execute(args);
         
     }
 
@@ -179,5 +154,30 @@ public class NotebooksFragment extends DatabaseListFragment implements PositiveN
             cursorAdapter.swapCursor(MarkitDownDbCursor.Notebooks
                     .createNotebookListCursor(readableDb));
         }
+    }
+
+    private AsyncTask<Bundle, Void, Void> newCreateNotebookTask() {
+        return new AsyncTask<Bundle, Void, Void>() {
+
+            @Override
+            protected Void doInBackground(Bundle... params) {
+                String title = params[0].getString(NotebooksFragment.EXTRA_NOTEBOOK_TITLE);
+                int color = params[0].getInt(NotebooksFragment.EXTRA_NOTEBOOK_COLOR);
+
+                SQLiteDatabase writableDb = dbHelper.getWritableDatabase();
+                ContentValues contentValues = new ContentValues();
+                contentValues.put(MarkItDownDbContract.Notebooks.COLUMN_NAME_TITLE, title);
+                contentValues.put(MarkItDownDbContract.Notebooks.COLUMN_NAME_COLOR, color);
+                writableDb.insert(MarkItDownDbContract.Notebooks.TABLE_NAME, null, contentValues);
+
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void v) {
+                // Swap cursor adapter
+                refreshNotebookListCursor();
+            }
+        };
     }
 }
