@@ -13,7 +13,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -50,8 +49,6 @@ public class NotebooksFragment extends DatabaseListFragment implements PositiveN
     @Override
     public void onAttach(Activity context) {
         super.onAttach(context);
-        Log.d("Excep", "onAttach");
-
         try {
             this.listenerActivity =
                     (FragmentCommunicationContract.OnMessageSendingNeeded)context;

@@ -18,7 +18,8 @@ import java.util.HashMap;
  * A dialog which takes in a input an array of colors and creates a palette allowing the user to
  * select one or more color swatches. There are two versions of the dialog: material and default.
  */
-public class ColorPickerDialog extends DialogFragment implements ColorPickerSwatch.OnColorSelectedListener {
+public class ColorPickerDialog extends DialogFragment implements
+        ColorPickerSwatch.OnColorSelectedListener {
 
     /**
      * Builder for {@link #ColorPickerDialog}.
@@ -181,6 +182,8 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerSwat
         void onColorPickerDialogCancelPressed(int[] selectedColors);
     }
 
+    private static final int NO_INDEX = -1; // indicates an invalid index
+
     public static final int SIZE_LARGE = 1;
     public static final int SIZE_SMALL = 2;
 
@@ -277,7 +280,7 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerSwat
 
 
     private void initialize(int titleResId, int[] colors, int[] selectedColors, int numColumns,
-                           int swatchSize, int maxSelectedColors, String[] colorContentDescriptions,
+                            int swatchSize, int maxSelectedColors, String[] colorContentDescriptions,
                             boolean useDefaultColorContentDescriptions,
                             OnOkCancelPressListener listener) {
         this.maxSelectedColors = maxSelectedColors;
@@ -290,7 +293,7 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerSwat
     }
 
     private void initialize(int titleResId, int[] colors, int[] selectedColors, int numColumns,
-                           int swatchSize) {
+                            int swatchSize) {
         initialize(titleResId, colors, selectedColors, numColumns, swatchSize, Integer.MAX_VALUE,
                 null, true, null);
     }
@@ -485,7 +488,9 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerSwat
          * initialized correctly, when a call to ".show()" is made, the dialog might exhibit
          * erroneous behavior.
          */
-        numSelectedColors = selectedColors.length;
+        int firstSelectedColorIndex = NO_INDEX;
+        Integer index = null;
+        numSelectedColors = 0;
 
         HashMap<Integer, Integer> hasMap = new HashMap<Integer, Integer>();
         for (int i = 0; i < colors.length; i++) {
@@ -493,13 +498,21 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerSwat
         }
         indexOfColor = hasMap;
         colorSelected = new boolean[colors.length];
-       // Arrays.fill(colorSelected, false);
 
+        // The if's in the for loop were added to support "default colors" i.e. colors that should
+        // not be displayed in the palette, but can be displayed somewhere in the app.
         for (int color : selectedColors) {
-            colorSelected[indexOfColor.get(color)] = true;
+            index = indexOfColor.get(color);
+            // If color exists in palette, set it as marked, otherwise ignore
+            if (index != null) {
+                numSelectedColors++;
+                colorSelected[index] = true;
+                firstSelectedColorIndex = (firstSelectedColorIndex == NO_INDEX) ? index :
+                        firstSelectedColorIndex;
+            }
         }
 
-        if(selectedColors.length > 0) {
+        if(numSelectedColors > 0) {
             // by default, use the first color from selectedColors are the lastSelectedColorIndex
             lastSelectedColorIndex = indexOfColor.get(selectedColors[0]);
         }

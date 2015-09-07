@@ -18,6 +18,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import iluxonchik.github.io.markitdown.Defaults;
 import iluxonchik.github.io.markitdown.NotebooksFragment;
 import iluxonchik.github.io.markitdown.R;
 import io.github.iluxonchik.colorpicker.ColorPickerDialog;
@@ -27,7 +28,7 @@ import io.github.iluxonchik.colorpicker.ColorPickerDialog;
  */
 public class NewNotebookDialogFragment extends DialogFragment {
     private PositiveNegativeListener listener;
-    private int selectedColor = Color.TRANSPARENT;
+    private int selectedColor = Defaults.Colors.DEFAULT_COLOR;
     private String notebookTitle = null;
 
     public NewNotebookDialogFragment() {
@@ -47,10 +48,17 @@ public class NewNotebookDialogFragment extends DialogFragment {
             public void onClick(View v) {
                 ColorPickerDialog.Builder builder = new ColorPickerDialog.Builder();
                 builder.maxSelectedColors(1)
+                        .colors(Defaults.Colors.COLOR_ARRAY)
+                        .selectedColors(new int[]{selectedColor})
                         .setOnOkCancelPressListener(new ColorPickerDialog.OnOkCancelPressListener() {
                             @Override
                             public void onColorPickerDialogOkPressed(int[] selectedColors) {
-                                selectedColor = selectedColors[0];
+                                if (selectedColors.length == 0) {
+                                    // If no colors are selected, reset the notebook color to def
+                                    selectedColor = Defaults.Colors.DEFAULT_COLOR;
+                                } else {
+                                    selectedColor = selectedColors[0];
+                                }
                                 setImageViewColor(colorImageView, selectedColor);
                             }
 
@@ -60,7 +68,6 @@ public class NewNotebookDialogFragment extends DialogFragment {
                             }
                         });
                 builder.build().show(getFragmentManager(), null);
-                Toast.makeText(getActivity(), "ColorPickerDialog", Toast.LENGTH_SHORT).show();
             }
         });
         AlertDialog.Builder builder = new AlertDialog.Builder(factory.getContext());
