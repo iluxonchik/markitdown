@@ -24,7 +24,7 @@ import iluxonchik.github.io.markitdown.dialog.ShareAsDialogFragment;
 
 
 public class MainActivity extends AppCompatActivity
-        implements NotesFragment.OnCABStatusChangedListener,
+        implements DatabaseCABListFragment.OnCABStatusChangedListener,
         FragmentCommunicationContract.OnMessageSendingNeeded {
 
     private final String TOP_FRAGMENT_TAG = "TopFragment";

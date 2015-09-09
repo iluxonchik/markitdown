@@ -13,7 +13,11 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.LocalBroadcastManager;
+import android.view.ActionMode;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -25,7 +29,7 @@ import iluxonchik.github.io.markitdown.dialog.NewNotebookDialogFragment;
 import iluxonchik.github.io.markitdown.dialog.PositiveNegativeListener;
 import iluxonchik.github.io.markitdown.services.DeleteService;
 
-public class NotebooksFragment extends DatabaseListFragment implements PositiveNegativeListener {
+public class NotebooksFragment extends DatabaseCABListFragment implements PositiveNegativeListener {
 
     public static final String EXTRA_NOTEBOOK_TITLE = "notebookName";
     public static final String EXTRA_NOTEBOOK_COLOR = "notebookColor";
@@ -92,23 +96,24 @@ public class NotebooksFragment extends DatabaseListFragment implements PositiveN
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Bundle bundle = new Bundle();
                 TextView notebookTitle = (TextView) view.findViewById(R.id.notebook_title);
-                        bundle.putString(FragmentCommunicationContract.
-                                SetTitleBarTitle.ARG_FRAGMENT_TITLE, notebookTitle.getText()
-                                .toString());
                 bundle.putString(FragmentCommunicationContract.
-                        StartNotesFromNotebooks.ARG_CUSTOM_SELECTION,
+                        SetTitleBarTitle.ARG_FRAGMENT_TITLE, notebookTitle.getText()
+                        .toString());
+                bundle.putString(FragmentCommunicationContract.
+                                StartNotesFromNotebooks.ARG_CUSTOM_SELECTION,
                         MarkItDownDbContract.Notes.COLUMN_NAME_NOTEBOOK + "=?");
                 bundle.putStringArray(FragmentCommunicationContract.
-                        StartNotesFromNotebooks.ARG_CUSTOM_SELECTION_ARGS,
+                                StartNotesFromNotebooks.ARG_CUSTOM_SELECTION_ARGS,
                         new String[]{Long.toString(id)});
 
                 listenerActivity.onMessageSent(
                         FragmentCommunicationContract.Message.MESSAGE_START_NOTES_FROM_NOTEBOOKS,
                         bundle
-                        );
+                );
             }
         });
     }
+
 
     @Override
     public void onPause() {
@@ -176,5 +181,43 @@ public class NotebooksFragment extends DatabaseListFragment implements PositiveN
                 refreshNotebookListCursor();
             }
         };
+    }
+
+    private void invertMenuOptions(Menu menu) {
+        final int OPEN_POS = 0;
+        menu.getItem(OPEN_POS).setEnabled(!menu.getItem(OPEN_POS).isEnabled());
+    }
+
+    // Overrides from parent class
+    @Override
+    protected void handleOnDestroyActionMode(ActionMode mode) {
+        newNotebookFAB.show();
+    }
+
+    @Override
+    protected boolean handleOnActionItemClicked(ActionMode mode, MenuItem item) {
+
+        return false;
+    }
+
+    @Override
+    protected void handleOnCreateActionMode(ActionMode mode, Menu menu) {
+        newNotebookFAB.hide();
+    }
+
+    @Override
+    protected void handleFromSingleCheckedItemToMultiple(ActionMode mode, int position, long id, boolean checked) {
+        invertMenuOptions(mode.getMenu());
+    }
+
+    @Override
+    protected void handleFromMultipleCheckedItemsToSingle(ActionMode mode, int position, long id, boolean checked) {
+        invertMenuOptions(mode.getMenu());
+    }
+
+    @Override
+    protected void inflateContextMenu(ActionMode mode, Menu menu) {
+        MenuInflater menuInflater = mode.getMenuInflater();
+        menuInflater.inflate(R.menu.menu_notebooks_context, menu);
     }
 }

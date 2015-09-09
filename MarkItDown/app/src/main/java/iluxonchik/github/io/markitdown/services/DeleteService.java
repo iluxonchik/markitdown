@@ -22,7 +22,7 @@ public class DeleteService extends IntentService {
     private static final String EXTRA_NOTEBOOK_ID = "iluxonchik.github.io.markitdown.extra.NOTEBOOK_ID";
 
     private static final int DEFAULT_ID = -1;
-    private final String DELETE_NOTE_SERVICE_LOGTAG = "DeleteService";
+    private final String DELETE_SERVICE_LOGTAG = "DeleteService";
 
     private MarkItDownDbHelper dbHelper;
     private SQLiteDatabase writableDb;
@@ -79,11 +79,11 @@ public class DeleteService extends IntentService {
     private void handleActionDeleteNote(int noteId) {
         if (noteId == DEFAULT_ID) {
             // Something went wrong...
-            Log.d(DELETE_NOTE_SERVICE_LOGTAG, "noteId = -1");
+            Log.d(DELETE_SERVICE_LOGTAG, "noteId = -1");
             return;
         }
-        dbHelper = new MarkItDownDbHelper(this);
-        writableDb = dbHelper.getWritableDatabase();
+        initializeDatabase();
+
         // Remove note references from "Notes" table
         deleteFromNotesTable(noteId);
 
@@ -95,8 +95,16 @@ public class DeleteService extends IntentService {
      * parameters.
      */
     private void handleActionDeleteNotebook(int notebookId) {
-        // TODO: Handle action DeleteNote
-        throw new UnsupportedOperationException("Not yet implemented");
+        if (notebookId == DEFAULT_ID) {
+            Log.d(DELETE_SERVICE_LOGTAG, "noteId = -1");
+            return;
+        }
+        
+        initializeDatabase();
+        deleteFromNotebooksTable(notebookId);
+
+        LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(ACTION_DELETE_NOTEBOOK));
+
     }
 
     @Override
@@ -111,7 +119,23 @@ public class DeleteService extends IntentService {
         }
     }
 
+    private void deleteFromNotebooksTable(int notebookId) {
+        // TODO: reset notebook ID in Notes table (?)
+
+        writableDb.delete(MarkItDownDbContract.Notebooks.TABLE_NAME, "_id = ?",
+                new String[] {Integer.toString(notebookId)});
+    }
+
     private void deleteFromNotesTable(int noteId) {
-        writableDb.delete(MarkItDownDbContract.Notes.TABLE_NAME, "_id = ?", new String[]{Integer.toString(noteId)});
+        writableDb.delete(MarkItDownDbContract.Notes.TABLE_NAME, "_id = ?",
+                new String[]{Integer.toString(noteId)});
+    }
+
+    private void initializeDatabase() {
+        if (dbHelper == null)
+            dbHelper = new MarkItDownDbHelper(this);
+
+        if (writableDb == null)
+            writableDb = dbHelper.getWritableDatabase();
     }
 }

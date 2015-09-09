@@ -24,7 +24,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.ListView;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -34,7 +33,7 @@ import iluxonchik.github.io.markitdown.dialog.NotebooksListDialogFragment;
 import iluxonchik.github.io.markitdown.dialog.ShareAsDialogFragment;
 import iluxonchik.github.io.markitdown.services.DeleteService;
 
-public class NotesFragment extends DatabaseListFragment
+public class NotesFragment extends DatabaseCABListFragment
         implements ShareAsDialogFragment.OnShareAsOptionSelectedListener{
 
     // Custom selection string and args for SQL queries
@@ -44,11 +43,6 @@ public class NotesFragment extends DatabaseListFragment
     public static final String EXTRA_CUSTOM_SELECTION = "customSelection";
     public static final String EXTRA_CUSTOM_SELECTION_ARGS = "customSelectionArgs";
     private FragmentCommunicationContract.OnMessageSendingNeeded listenerActivity;
-
-    public interface OnCABStatusChangedListener {
-        void onCABCreate();
-        void onCABDestroy();
-    }
 
     private class AddNotesToNotebookTask extends AsyncTask<Long[], Void, Boolean > {
 
@@ -95,7 +89,6 @@ public class NotesFragment extends DatabaseListFragment
 
     private NotesListCursorAdapter cursorAdapter;
     private FloatingActionButton newNoteFAB;
-    private OnCABStatusChangedListener onCABStatusChangedListener;
 
     private final int CURSOR_TITLE_POS = 0;
     private final int CURSOR_CONTENT_POS = 1;
@@ -145,114 +138,6 @@ public class NotesFragment extends DatabaseListFragment
 
         return view;
         //return super.onCreateView(inflater, container, savedInstanceState);
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        final ListView listView = getListView();
-        listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
-        //listView.setSelector(R.drawable.list_selector);
-        listView.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
-            private final int VIEW_MENU_POS = 0;
-            private final int EDIT_MENU_POS = 1;
-            private final int SHARE_MENU_POS = 2;
-
-            private boolean multipleItemsChecked = false;
-
-            @Override
-            public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
-                // TODO: REFRACTOR nested if's
-                if (multipleItemsChecked) {
-                    if (listView.getCheckedItemCount() == 1) {
-                        // Passing from multiple checked items to one
-                        multipleItemsChecked = false;
-                        invertMenuOptions(mode.getMenu());
-                    }
-                } else {
-                    if (listView.getCheckedItemCount() > 1) {
-                        multipleItemsChecked = true;
-                        invertMenuOptions(mode.getMenu());
-                    }
-                }
-            }
-
-            @Override
-            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-                // Inflate menu
-                // TODO: tell activity to disable drawer layout
-                MenuInflater menuInflater = mode.getMenuInflater();
-                menuInflater.inflate(R.menu.menu_notes_context, menu);
-                newNoteFAB.hide();
-                onCABStatusChangedListener.onCABCreate();
-                return true;
-            }
-
-            private void invertMenuOptions(Menu menu) {
-                /*
-                    Inverts the View, Edit and Share options availability in menu.
-                */
-                menu.getItem(VIEW_MENU_POS).setEnabled(!menu.getItem(VIEW_MENU_POS).isEnabled());
-                menu.getItem(EDIT_MENU_POS).setEnabled(!menu.getItem(EDIT_MENU_POS).isEnabled());
-                menu.getItem(SHARE_MENU_POS).setEnabled(!menu.getItem(SHARE_MENU_POS).isEnabled());
-
-            }
-
-            @Override
-            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-                return false;
-            }
-
-            @Override
-            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-                Intent intent;
-                switch (item.getItemId()) {
-                    case (R.id.view_note):
-                        intent = new Intent(getActivity(), ViewNoteActivity.class);
-                        intent.putExtra(ViewNoteActivity.EXTRA_NOTE_ID, getSingleSelectedItemId());
-                        mode.finish();
-                        startActivity(intent);
-                        break;
-                    case (R.id.share_note):
-                        ShareAsDialogFragment shareAsDialogFragment = new ShareAsDialogFragment();
-                        shareAsDialogFragment.show(getFragmentManager(), null);
-                        break;
-                    case (R.id.add_to_notebook):
-                        NotebooksListDialogFragment dialog = new NotebooksListDialogFragment();
-                        dialog.setOnNotebookSelectedListener(
-                                new NotebooksListDialogFragment.OnNotebookSelectedListener() {
-                                    @Override
-                                    public void onNotebookSelected(DialogFragment dialog, long id) {
-                                        dialog.dismiss();
-                                        long[] notes = getListView().getCheckedItemIds();
-                                        new AddNotesToNotebookTask().execute(ArrayUtils.toObject(notes),
-                                                new Long[]{id});
-                                    }
-                                });
-                        dialog.show(getFragmentManager(), null);
-                        break;
-                    case (R.id.edit_note):
-                        intent = new Intent(getActivity(), EditNoteActivity.class);
-                        intent.putExtra(EditNoteActivity.NOTE_ID_ARG, getSingleSelectedItemId());
-                        mode.finish();
-                        startActivity(intent);
-                        break;
-                    case (R.id.delete_note):
-                        handleNoteDeletion();
-                        break;
-                }
-                return false;
-            }
-
-            @Override
-            public void onDestroyActionMode(ActionMode mode) {
-                // TODO: tell activity to enable drawer layout
-                newNoteFAB.show();
-                onCABStatusChangedListener.onCABDestroy();
-            }
-
-        });
-
     }
 
 
@@ -321,14 +206,7 @@ public class NotesFragment extends DatabaseListFragment
 
     @Override
     public void onAttach(Activity activity) {
-        try {
-            onCABStatusChangedListener = (OnCABStatusChangedListener)activity;
-
-        } catch (ClassCastException e) {
-            throw new ClassCastException("Activity that uses "+
-                    this.getClass().getCanonicalName() + " must implement " +
-                    OnCABStatusChangedListener.class.getCanonicalName());
-        }
+        super.onAttach(activity);
 
         try {
             this.listenerActivity =
@@ -340,13 +218,11 @@ public class NotesFragment extends DatabaseListFragment
                             OnMessageSendingNeeded.class.getCanonicalName());
         }
 
-        super.onAttach(activity);
     }
 
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        //Integer note_id = (Integer)v.getTag();
         Integer note_id = (int)id;
         Intent intent = new Intent(getActivity(), ViewNoteActivity.class);
         intent.putExtra(ViewNoteActivity.EXTRA_NOTE_ID, note_id);
@@ -376,8 +252,22 @@ public class NotesFragment extends DatabaseListFragment
 
     }
 
+    private void invertMenuOptions(Menu menu) {
+        /*
+            Inverts the View, Edit and Share options availability in menu.
+        */
+        final int VIEW_MENU_POS = 0;
+        final int EDIT_MENU_POS = 1;
+        final int SHARE_MENU_POS = 3;
+
+        menu.getItem(VIEW_MENU_POS).setEnabled(!menu.getItem(VIEW_MENU_POS).isEnabled());
+        menu.getItem(EDIT_MENU_POS).setEnabled(!menu.getItem(EDIT_MENU_POS).isEnabled());
+        menu.getItem(SHARE_MENU_POS).setEnabled(!menu.getItem(SHARE_MENU_POS).isEnabled());
+
+    }
+
     private void startShareIntent(Cursor cursor) {
-        ShareAsDialogFragment.startShareIntent(getActivity(),cursor.getString(CURSOR_CONTENT_POS),
+        ShareAsDialogFragment.startShareIntent(getActivity(), cursor.getString(CURSOR_CONTENT_POS),
                 cursor.getString(CURSOR_CONTENT_POS));
     }
 
@@ -420,5 +310,80 @@ public class NotesFragment extends DatabaseListFragment
         builder.setTitle(getResources().getString(titleResId));
         builder.setMessage(getResources().getString(messageResId) + " " +
                 getResources().getString(R.string.dialog_action_cannot_be_undone));
+    }
+
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+    }
+
+    // Overrides from parent class
+    @Override
+    protected void handleOnDestroyActionMode(ActionMode mode) {
+        newNoteFAB.show();
+    }
+
+    @Override
+    protected boolean handleOnActionItemClicked(ActionMode mode, MenuItem item) {
+        Intent intent;
+        switch (item.getItemId()) {
+            case (R.id.view_note):
+                intent = new Intent(getActivity(), ViewNoteActivity.class);
+                intent.putExtra(ViewNoteActivity.EXTRA_NOTE_ID, getSingleSelectedItemId());
+                mode.finish();
+                startActivity(intent);
+                break;
+            case (R.id.share_note):
+                ShareAsDialogFragment shareAsDialogFragment = new ShareAsDialogFragment();
+                shareAsDialogFragment.show(getFragmentManager(), null);
+                break;
+            case (R.id.add_to_notebook):
+                NotebooksListDialogFragment dialog = new NotebooksListDialogFragment();
+                dialog.setOnNotebookSelectedListener(
+                        new NotebooksListDialogFragment.OnNotebookSelectedListener() {
+                            @Override
+                            public void onNotebookSelected(DialogFragment dialog, long id) {
+                                dialog.dismiss();
+                                long[] notes = getListView().getCheckedItemIds();
+                                new AddNotesToNotebookTask().execute(ArrayUtils.toObject(notes),
+                                        new Long[]{id});
+                            }
+                        });
+                dialog.show(getFragmentManager(), null);
+                break;
+            case (R.id.edit_note):
+                intent = new Intent(getActivity(), EditNoteActivity.class);
+                intent.putExtra(EditNoteActivity.NOTE_ID_ARG, getSingleSelectedItemId());
+                mode.finish();
+                startActivity(intent);
+                break;
+            case (R.id.delete_note):
+                handleNoteDeletion();
+                break;
+        }
+        return false;
+    }
+
+    @Override
+    protected void handleOnCreateActionMode(ActionMode mode, Menu menu) {
+        newNoteFAB.hide();
+    }
+
+    @Override
+    protected void handleFromSingleCheckedItemToMultiple(ActionMode mode, int position, long id, boolean checked) {
+        invertMenuOptions(mode.getMenu());
+    }
+
+    @Override
+    protected void handleFromMultipleCheckedItemsToSingle(ActionMode mode, int position, long id, boolean checked) {
+        invertMenuOptions(mode.getMenu());
+    }
+
+
+    @Override
+    protected void inflateContextMenu(ActionMode mode, Menu menu) {
+        MenuInflater menuInflater = mode.getMenuInflater();
+        menuInflater.inflate(R.menu.menu_notes_context, menu);
     }
 }

@@ -29,10 +29,14 @@
     <string name="dialog_yes">Yes</string>
     <string name="dialog_no">No</string>
     <string name="dialog_delete_multiple_notes_question">Delete selected notes?</string>
-    <string name="dialog_delete_single_note_question">Delete selected notes?</string>
+    <string name="dialog_delete_single_note_question">Delete selected note?</string>
     <string name="dialog_delete_single_note_text">Are you sure you want to delete the selected note?</string>
     <string name="dialog_delete_multiple_notes_text">Are you sure you want to delete the selected notes?</string>
     <string name="dialog_action_cannot_be_undone">This action cannot be undone.</string>
+
+
+    <string name="dialog_delete_single_notebook_question">Delete selected notebook?</string>
+    <string name="dialog_delete_multiple_notebooks_question">Delete selected notebooks?</string>
 
     <string name="dialog_new_notebook_title">Create Notebook</string>
     <string name="dialog_new_notebook_hint">Name</string>
@@ -50,8 +54,12 @@
     <string name="snackbar_notes_added">Notes added to notebook</string>
     <string name="snackbar_action">Dismiss</string>
 
+
+
 <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_edit_note">EditNoteActivity</string>
     <string name="title_activity_view_note">ViewNoteActivity</string>
+    <string name="action_open_notebook">Open</string>
+    <string name="action_delete_notebook">Delete</string>
 </resources>
