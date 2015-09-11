@@ -1,6 +1,8 @@
 package iluxonchik.github.io.markitdown;
 
 import android.app.Activity;
+import android.content.DialogInterface;
+import android.support.v7.app.AlertDialog;
 import android.app.DialogFragment;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
@@ -94,22 +96,7 @@ public class NotebooksFragment extends DatabaseCABListFragment implements Positi
         getListView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Bundle bundle = new Bundle();
-                TextView notebookTitle = (TextView) view.findViewById(R.id.notebook_title);
-                bundle.putString(FragmentCommunicationContract.
-                        SetTitleBarTitle.ARG_FRAGMENT_TITLE, notebookTitle.getText()
-                        .toString());
-                bundle.putString(FragmentCommunicationContract.
-                                StartNotesFromNotebooks.ARG_CUSTOM_SELECTION,
-                        MarkItDownDbContract.Notes.COLUMN_NAME_NOTEBOOK + "=?");
-                bundle.putStringArray(FragmentCommunicationContract.
-                                StartNotesFromNotebooks.ARG_CUSTOM_SELECTION_ARGS,
-                        new String[]{Long.toString(id)});
-
-                listenerActivity.onMessageSent(
-                        FragmentCommunicationContract.Message.MESSAGE_START_NOTES_FROM_NOTEBOOKS,
-                        bundle
-                );
+                openNotebook(view, id);
             }
         });
     }
@@ -196,9 +183,37 @@ public class NotebooksFragment extends DatabaseCABListFragment implements Positi
 
     @Override
     protected boolean handleOnActionItemClicked(ActionMode mode, MenuItem item) {
+        switch (item.getItemId()) {
+            case (R.id.action_open_notebook):
+                    openNotebook(getListView(), getSingleSelectedItemId());
+                    mode.finish();
+                break;
+            case (R.id.action_delete_notebook):
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        deleteSelectedNotebooks();
+                    }
+                });
+                builder.setNegativeButton(android.R.string.no, null);
+                setAlertDialogText(builder);
+                builder.show();
+                break;
+
+        }
 
         return false;
     }
+
+    private void deleteSelectedNotebooks() {
+        long[] selectedNotebooksIds = getSelectedItemIds();
+        for (long id : selectedNotebooksIds) {
+            DeleteService.startActionDeleteNotebook(getActivity(), (int)id);
+        }
+
+    }
+
 
     @Override
     protected void handleOnCreateActionMode(ActionMode mode, Menu menu) {
@@ -219,5 +234,40 @@ public class NotebooksFragment extends DatabaseCABListFragment implements Positi
     protected void inflateContextMenu(ActionMode mode, Menu menu) {
         MenuInflater menuInflater = mode.getMenuInflater();
         menuInflater.inflate(R.menu.menu_notebooks_context, menu);
+    }
+
+    private void openNotebook(View view, long id) {
+        Bundle bundle = new Bundle();
+        TextView notebookTitle = (TextView) view.findViewById(R.id.notebook_title);
+        bundle.putString(FragmentCommunicationContract.
+                SetTitleBarTitle.ARG_FRAGMENT_TITLE, notebookTitle.getText()
+                .toString());
+        bundle.putString(FragmentCommunicationContract.
+                        StartNotesFromNotebooks.ARG_CUSTOM_SELECTION,
+                MarkItDownDbContract.Notes.COLUMN_NAME_NOTEBOOK + "=?");
+        bundle.putStringArray(FragmentCommunicationContract.
+                        StartNotesFromNotebooks.ARG_CUSTOM_SELECTION_ARGS,
+                new String[]{Long.toString(id)});
+
+        listenerActivity.onMessageSent(
+                FragmentCommunicationContract.Message.MESSAGE_START_NOTES_FROM_NOTEBOOKS,
+                bundle
+        );
+    }
+
+    public void setAlertDialogText(AlertDialog.Builder builder) {
+        int titleResId;
+        int messageResId;
+        int numSelectedNotes = getListView().getCheckedItemCount();
+
+        if (numSelectedNotes > 1) {
+            titleResId = R.string.dialog_delete_multiple_notebooks_question;
+            messageResId = R.string.dialog_delete_multiple_notebooks_text;
+        } else {
+            titleResId = R.string.dialog_delete_single_notebook_question;
+            messageResId = R.string.dialog_delete_single_notebook_text;
+        }
+
+        builder.setTitle(titleResId).setMessage(messageResId);
     }
 }

@@ -99,7 +99,7 @@ public class DeleteService extends IntentService {
             Log.d(DELETE_SERVICE_LOGTAG, "noteId = -1");
             return;
         }
-        
+
         initializeDatabase();
         deleteFromNotebooksTable(notebookId);
 

@@ -103,7 +103,7 @@ public class NotesFragment extends DatabaseCABListFragment
         @Override
         public void onReceive(Context context, Intent intent) {
             // Broadcast from DeleteService
-            cursorAdapter.swapCursor(createNotesListCursor());
+            refreshNotesListCursor();
             Log.d(NOTESFRAGMENT_LOGCAT_TAG, "Note deleted!");
         }
     };
@@ -168,9 +168,8 @@ public class NotesFragment extends DatabaseCABListFragment
     }
 
     private void deleteSelectedNotes() {
-        long[] checkedItemIds = getListView().getCheckedItemIds();
-        for (long id : checkedItemIds)
-        {
+        long[] checkedItemIds = getSelectedItemIds();
+        for (long id : checkedItemIds) {
             DeleteService.startActionDeleteNote(getActivity(), (int) id);
         }
     }
@@ -182,7 +181,8 @@ public class NotesFragment extends DatabaseCABListFragment
         Cursor cursor = createNotesListCursor();
         cursorAdapter = new NotesListCursorAdapter(getActivity(), cursor, 0);
         setListAdapter(cursorAdapter);
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(broadcastReceiver, new IntentFilter(DeleteService.ACTION_DELETE_NOTE));
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(broadcastReceiver,
+                new IntentFilter(DeleteService.ACTION_DELETE_NOTE));
 
         Bundle args = getArguments();
 
@@ -385,5 +385,9 @@ public class NotesFragment extends DatabaseCABListFragment
     protected void inflateContextMenu(ActionMode mode, Menu menu) {
         MenuInflater menuInflater = mode.getMenuInflater();
         menuInflater.inflate(R.menu.menu_notes_context, menu);
+    }
+
+    private void refreshNotesListCursor() {
+        cursorAdapter.swapCursor(createNotesListCursor());
     }
 }

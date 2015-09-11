@@ -38,6 +38,12 @@
     <string name="dialog_delete_single_notebook_question">Delete selected notebook?</string>
     <string name="dialog_delete_multiple_notebooks_question">Delete selected notebooks?</string>
 
+    <string name="dialog_delete_single_notebook_text">Are you sure you want to delete the selected
+        notebook?</string>
+    <string name="dialog_delete_multiple_notebooks_text">Are you sure you want to delete
+        the selected notebooks?</string>
+
+
     <string name="dialog_new_notebook_title">Create Notebook</string>
     <string name="dialog_new_notebook_hint">Name</string>
     <string name="dialog_new_notebook_color_text">Color</string>

@@ -32,4 +32,8 @@ public abstract class DatabaseListFragment extends ListFragment{
         long[] checkedItemIds = getListView().getCheckedItemIds();
         return (int)checkedItemIds[0];
     }
+
+    protected long[] getSelectedItemIds() {
+        return getListView().getCheckedItemIds();
+    }
 }
