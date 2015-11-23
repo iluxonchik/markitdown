@@ -145,7 +145,6 @@ public class ViewNoteActivity extends AppCompatActivity implements ShareAsDialog
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(NOTE_TITLE, noteTitle);
-        Log.d(VIEW_NOTE_ACTIVITY_LOGTAG, "NoteTitle: " + noteTitle);
         outState.putString(NOTE_CONTENT, noteContent);
         outState.putBoolean(CAME_FROM_PAUSED_STATE, cameFromPausedState);
     }
