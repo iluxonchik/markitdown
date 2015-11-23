@@ -32,7 +32,6 @@ public class ViewNoteActivity extends AppCompatActivity implements ShareAsDialog
     public static  final String EXTRA_NOTE_ID = "NoteId";
     private final int NULL_NOTE = -1;
     private int noteId;
-    private BroadcastReceiver receiver;
     private MarkItDownDbHelper dbHelper;
     private SQLiteDatabase readableDb;
     private Cursor cursor;
@@ -51,6 +50,24 @@ public class ViewNoteActivity extends AppCompatActivity implements ShareAsDialog
 
     private boolean cameFromPausedState = false;
 
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // HTML note ready, query db and display results
+            Log.d(VIEW_NOTE_ACTIVITY_LOGTAG, "Received broadcast");
+            refreshWebViewContents();
+        }
+    };
+
+
+    /**
+     * Gets a new cursor for the WebView, which forces the note HTML to be refreshed.
+     */
+    private void refreshWebViewContents() {
+        updateNoteCursor();
+        showNote();
+    }
+
 
     private class EditCheckTask extends AsyncTask<Integer, Void, Boolean> {
         private final int CURSOR_EDITED_POS = 0;
@@ -63,7 +80,7 @@ public class ViewNoteActivity extends AppCompatActivity implements ShareAsDialog
                     new String[]{Integer.toString(params[0])}, null, null, null, null);
 
             if (!cursor.moveToFirst()) {
-                Log.d(VIEW_NOTE_ACTIVITY_LOGTAG, "EiditCheckTask: cursor empty");
+                Log.d(VIEW_NOTE_ACTIVITY_LOGTAG, "EditCheckTask: cursor empty");
                 return false;
             }
 
@@ -95,18 +112,11 @@ public class ViewNoteActivity extends AppCompatActivity implements ShareAsDialog
         dbHelper = new MarkItDownDbHelper(this);
         readableDb = dbHelper.getReadableDatabase();
 
-        receiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                // HTML note ready, query db and display results
-                Log.d(VIEW_NOTE_ACTIVITY_LOGTAG, "Received broadcast");
-                ViewNoteActivity.this.populateWebViewWithNote((WebView) findViewById(R.id.note_content), getCursor());
-            }
-        };
-
         if (savedInstanceState != null) {
             restoreNoteFromSavedInstanceState(savedInstanceState);
         } else {
+            // might be the first time the note is opened, so start the conversion service
+             startMarkdownToHTMLService();
              showNote();
         }
         android.support.v7.app.ActionBar actionBar = getSupportActionBar();
@@ -118,7 +128,7 @@ public class ViewNoteActivity extends AppCompatActivity implements ShareAsDialog
     public void onResume() {
         super.onResume();
         IntentFilter filter = new IntentFilter(MarkdownToHTMLService.ACTION_COMPLETE);
-        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter);
+        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, filter);
 
         if (cameFromPausedState)
             new EditCheckTask().execute(noteId);
@@ -126,7 +136,7 @@ public class ViewNoteActivity extends AppCompatActivity implements ShareAsDialog
 
     @Override
     public void onPause() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
         cameFromPausedState = true;
         super.onPause();
     }
@@ -135,6 +145,7 @@ public class ViewNoteActivity extends AppCompatActivity implements ShareAsDialog
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(NOTE_TITLE, noteTitle);
+        Log.d(VIEW_NOTE_ACTIVITY_LOGTAG, "NoteTitle: " + noteTitle);
         outState.putString(NOTE_CONTENT, noteContent);
         outState.putBoolean(CAME_FROM_PAUSED_STATE, cameFromPausedState);
     }
@@ -232,13 +243,14 @@ public class ViewNoteActivity extends AppCompatActivity implements ShareAsDialog
         noteContent = savedInstanceState.getString(NOTE_CONTENT);
         noteTitle = savedInstanceState.getString(NOTE_TITLE);
         cameFromPausedState = savedInstanceState.getBoolean(CAME_FROM_PAUSED_STATE);
-        ((TextView)findViewById(R.id.note_title)).setText(noteTitle);
-        ((WebView)findViewById(R.id.note_content)).loadData(noteContent, WEBVIEW_MIME, WEBVIEW_ENCODING);
+        populateTextViewWithTitle(noteTitle);
+        populateWebViewWithNote(noteContent);
     }
 
     private void showNote() {
-        startMarkdownToHTMLService();
-        populateTextViewWithTitle((TextView) findViewById(R.id.note_title), getCursor());
+
+        populateWebViewWithNote(getCursor());
+        populateTextViewWithTitle(getCursor());
     }
 
     private void startMarkdownToHTMLService() {
@@ -247,25 +259,35 @@ public class ViewNoteActivity extends AppCompatActivity implements ShareAsDialog
         startService(intent);
     }
 
-    private void populateWebViewWithNote(WebView webView, Cursor cursor) {
+    private void populateWebViewWithNote(Cursor cursor) {
 
         if (!cursor.moveToFirst()) {
             Log.d(VIEW_NOTE_ACTIVITY_LOGTAG, "populateWebViewWithNote(): Cursor is empty.");
             return;
         }
+        noteContent = cursor.getString(CURSOR_HTMLTEXT_POS); // update note's content
+        populateWebViewWithNote(noteContent);
+    }
 
-        noteContent = cursor.getString(CURSOR_HTMLTEXT_POS);
+    private void populateWebViewWithNote(String noteContent) {
+
+        WebView webView = ((WebView)findViewById(R.id.note_content));
         webView.loadData(noteContent, WEBVIEW_MIME, WEBVIEW_ENCODING);
     }
 
-    private void populateTextViewWithTitle(TextView textView, Cursor cursor) {
+    private void populateTextViewWithTitle(Cursor cursor) {
 
         if (!cursor.moveToFirst()) {
             Log.d(VIEW_NOTE_ACTIVITY_LOGTAG, "populateTextViewWithTitle(): Cursor is empty.");
             return;
         }
-        noteTitle = cursor.getString(CURSOR_TITLE_POS);
-        textView.setText(noteTitle);
+        populateTextViewWithTitle(cursor.getString(CURSOR_TITLE_POS));
+
+    }
+
+    private void populateTextViewWithTitle(String title) {
+        noteTitle = title; // update note's title
+        ((TextView)findViewById(R.id.note_title)).setText(noteTitle);
     }
 
 }
